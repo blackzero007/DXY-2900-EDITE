@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>树洞 · 匿名留言板</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🌳</span>
+                <h1>树洞</h1>
+            </div>
+            <p class="subtitle">说出你的心声，在这里，没人知道你是谁</p>
+        </header>
+
+        <section class="post-section">
+            <div class="post-card">
+                <div class="post-header">
+                    <span class="post-avatar" id="previewAvatar">🐱</span>
+                    <div class="post-nickname-wrap">
+                        <span class="post-nickname" id="previewNickname">橘子味的猫</span>
+                        <button class="refresh-btn" id="refreshNickname" title="换一个昵称">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 4v6h-6M1 20v-6h6"/>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <textarea 
+                    class="post-input" 
+                    id="postInput" 
+                    placeholder="有什么想说的？在这里倾诉吧..."
+                    maxlength="500"
+                ></textarea>
+                <div class="post-footer">
+                    <span class="char-count"><span id="charCount">0</span>/500</span>
+                    <button class="submit-btn" id="submitBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                        发布
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="filter-section">
+            <div class="sort-tabs">
+                <button class="sort-tab active" data-sort="hot">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2s4 4 4 8a4 4 0 0 1-8 0c0-2 1-3 1-3s-1 5 3 5 3-4 3-7c0-2-1-3-1-3z"/>
+                    </svg>
+                    最热
+                </button>
+                <button class="sort-tab" data-sort="new">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    最新
+                </button>
+            </div>
+            <div class="message-count">共 <span id="messageCount">0</span> 条心声</div>
+        </section>
+
+        <section class="messages-section" id="messagesList">
+        </section>
+
+        <footer class="footer">
+            <p>💫 你的秘密，树洞守护</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

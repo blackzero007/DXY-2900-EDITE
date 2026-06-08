@@ -50,6 +50,41 @@ const TAGS = [
     { key: 'treehole', label: '树洞', color: '#a8edea' }
 ];
 
+const DAILY_TOPIC_KEY = 'tree_hole_daily_topic';
+
+const TOPIC_POOL = [
+    '今天让你感到温暖的一个瞬间是什么？',
+    '如果可以对十年前的自己说一句话，你会说什么？',
+    '最近有什么让你觉得「人间值得」的小事？',
+    '你最想去的一个地方是哪里？为什么？',
+    '有没有一首歌，听到就会想起某个人？',
+    '你最近一次开怀大笑是因为什么？',
+    '如果有一天可以不用工作，你最想做什么？',
+    '你心中最理想的生活是什么样子的？',
+    '有没有一件事，你坚持了很久？',
+    '你觉得成长最大的代价是什么？',
+    '最近有没有什么让你焦虑的事情？',
+    '如果可以拥有一项超能力，你想要什么？',
+    '你最喜欢的季节是什么？为什么？',
+    '有没有一道菜，让你想起家的味道？',
+    '你最珍贵的一段回忆是什么？',
+    '最近有什么想要实现的小目标？',
+    '如果明天就是世界末日，你今天会做什么？',
+    '你觉得什么是真正的幸福？',
+    '有没有一个人，你想对他/她说声谢谢？',
+    '你最大的梦想是什么？',
+    '最近读过的一本好书是什么？',
+    '你觉得孤独是什么颜色的？',
+    '有没有一句话，一直激励着你前行？',
+    '你最想对现在的自己说什么？',
+    '如果可以回到过去，你想回到哪一年？',
+    '你觉得什么是真正的勇气？',
+    '最近有什么让你感动的事情吗？',
+    '你理想中的周末应该是什么样的？',
+    '有没有什么事情是你一直想做但还没做的？',
+    '你觉得人生中最重要的东西是什么？'
+];
+
 const STORAGE_KEY = 'tree_hole_messages';
 const RESONATED_KEY = 'tree_hole_resonated';
 
@@ -59,6 +94,7 @@ let currentSort = 'hot';
 let currentTag = 'all';
 let selectedPostTag = 'life';
 let currentIdentity = null;
+let dailyTopic = '';
 
 function randomChoice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -139,6 +175,91 @@ function saveResonated() {
     } catch (e) {
         console.error('保存失败:', e);
     }
+}
+
+function getTodayString() {
+    const now = new Date();
+    return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
+function loadDailyTopic() {
+    try {
+        const stored = localStorage.getItem(DAILY_TOPIC_KEY);
+        if (stored) {
+            const data = JSON.parse(stored);
+            if (data.date === getTodayString() && data.topic) {
+                dailyTopic = data.topic;
+                return;
+            }
+        }
+    } catch (e) {
+        console.error('加载每日话题失败:', e);
+    }
+
+    dailyTopic = randomChoice(TOPIC_POOL);
+    saveDailyTopic();
+}
+
+function saveDailyTopic() {
+    try {
+        localStorage.setItem(DAILY_TOPIC_KEY, JSON.stringify({
+            date: getTodayString(),
+            topic: dailyTopic
+        }));
+    } catch (e) {
+        console.error('保存每日话题失败:', e);
+    }
+}
+
+function renderDailyTopic() {
+    const container = document.getElementById('dailyTopicCard');
+    if (!container || !dailyTopic) return;
+
+    container.innerHTML = `
+        <div class="daily-topic-icon">💭</div>
+        <div class="daily-topic-content">
+            <div class="daily-topic-label">今日话题</div>
+            <div class="daily-topic-text">${escapeHtml(dailyTopic)}</div>
+        </div>
+        <button class="daily-topic-btn" id="useTopicBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            写点什么
+        </button>
+    `;
+
+    document.getElementById('useTopicBtn').addEventListener('click', handleUseTopic);
+}
+
+function handleUseTopic() {
+    const input = document.getElementById('postInput');
+    input.value = dailyTopic + ' ';
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+
+    const firstCard = document.querySelector('.post-card');
+    if (firstCard) {
+        firstCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+function getTimeUntilMidnight() {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    return midnight.getTime() - now.getTime();
+}
+
+function scheduleDailyRefresh() {
+    const delay = getTimeUntilMidnight();
+    setTimeout(() => {
+        dailyTopic = randomChoice(TOPIC_POOL);
+        saveDailyTopic();
+        renderDailyTopic();
+        scheduleDailyRefresh();
+    }, delay);
 }
 
 function getSampleMessages() {
@@ -470,10 +591,13 @@ function handleInput() {
 function init() {
     loadMessages();
     loadResonated();
+    loadDailyTopic();
     refreshIdentity();
+    renderDailyTopic();
     renderTagFilters();
     renderPostTagSelector();
     renderMessages();
+    scheduleDailyRefresh();
 
     document.getElementById('submitBtn').addEventListener('click', handleSubmit);
     document.getElementById('refreshNickname').addEventListener('click', refreshIdentity);

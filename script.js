@@ -109,6 +109,7 @@ let currentSort = 'hot';
 let currentTag = 'all';
 let currentMood = 'all';
 let currentFavSort = 'new';
+let currentRankingPeriod = 'week';
 let selectedPostTag = 'life';
 let selectedPostMood = 'happy';
 let currentIdentity = null;
@@ -1406,6 +1407,105 @@ function updateFavSortTabs() {
     });
 }
 
+function getStartOfWeek() {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(now.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday.getTime();
+}
+
+function getStartOfMonth() {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+}
+
+function getRankingMessages() {
+    const now = Date.now();
+    let filtered = [...messages];
+
+    if (currentRankingPeriod === 'week') {
+        const startOfWeek = getStartOfWeek();
+        filtered = filtered.filter(m => m.timestamp >= startOfWeek && m.timestamp <= now);
+    } else if (currentRankingPeriod === 'month') {
+        const startOfMonth = getStartOfMonth();
+        filtered = filtered.filter(m => m.timestamp >= startOfMonth && m.timestamp <= now);
+    }
+
+    const sorted = filtered.sort((a, b) => b.resonates - a.resonates || b.timestamp - a.timestamp);
+    return sorted.slice(0, 20);
+}
+
+function renderRankingPage() {
+    const container = document.getElementById('rankingList');
+    if (!container) return;
+
+    const rankedMessages = getRankingMessages();
+
+    if (rankedMessages.length === 0) {
+        let emptyText = '';
+        if (currentRankingPeriod === 'week') {
+            emptyText = '本周还没有留言，快来发布第一条吧~';
+        } else if (currentRankingPeriod === 'month') {
+            emptyText = '本月还没有留言，快来发布第一条吧~';
+        } else {
+            emptyText = '还没有任何留言，快来发布第一条吧~';
+        }
+
+        container.innerHTML = `
+            <div class="ranking-empty">
+                <div class="ranking-empty-icon">🏆</div>
+                <div class="ranking-empty-title">暂无排行数据</div>
+                <div class="ranking-empty-desc">${emptyText}</div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = rankedMessages.map((msg, index) => {
+        const rank = index + 1;
+        const topClass = rank <= 3 ? `top-${rank}` : '';
+        const rankDisplay = rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank;
+
+        return `
+            <div class="ranking-item ${topClass}" data-id="${msg.id}">
+                <div class="rank-badge">${rankDisplay}</div>
+                <div class="ranking-avatar" style="background: ${msg.color}">
+                    ${msg.emoji}
+                </div>
+                <div class="ranking-info">
+                    <div class="ranking-nickname">${msg.nickname}</div>
+                    <div class="ranking-content">${escapeHtml(msg.content)}</div>
+                </div>
+                <div class="ranking-resonate">
+                    <span class="ranking-resonate-count">${msg.resonates}</span>
+                    <span class="ranking-resonate-label">共鸣</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function handleRankingTabChange(e) {
+    const period = e.currentTarget.dataset.rankingPeriod;
+    if (period === currentRankingPeriod) return;
+
+    currentRankingPeriod = period;
+    updateRankingTabs();
+    renderRankingPage();
+}
+
+function updateRankingTabs() {
+    document.querySelectorAll('.ranking-tab').forEach(tab => {
+        if (tab.dataset.rankingPeriod === currentRankingPeriod) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+}
+
 function handleInput() {
     const input = document.getElementById('postInput');
     document.getElementById('charCount').textContent = input.value.length;
@@ -1668,6 +1768,10 @@ function switchPage(page) {
 
     if (page === 'favorites') {
         renderFavoritesPage();
+    }
+
+    if (page === 'ranking') {
+        renderRankingPage();
     }
 }
 
@@ -2229,6 +2333,10 @@ function init() {
 
     document.querySelectorAll('.favorites-sort-section .sort-tab').forEach(tab => {
         tab.addEventListener('click', handleFavSortChange);
+    });
+
+    document.querySelectorAll('.ranking-tab').forEach(tab => {
+        tab.addEventListener('click', handleRankingTabChange);
     });
 
     const dailyTopicCard = document.getElementById('dailyTopicCard');

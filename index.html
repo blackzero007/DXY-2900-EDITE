@@ -29,6 +29,10 @@
                 <span class="nav-icon">🍾</span>
                 <span>漂流瓶</span>
             </button>
+            <button class="nav-tab" data-page="ranking">
+                <span class="nav-icon">🏆</span>
+                <span>排行榜</span>
+            </button>
         </nav>
 
         <div class="page-content" id="treeholePage">
@@ -210,6 +214,35 @@
                 </div>
                 <div class="drift-bottles-list" id="pickedBottlesList">
                 </div>
+            </section>
+        </div>
+
+        <div class="page-content hidden" id="rankingPage">
+            <section class="ranking-header-section">
+                <div class="ranking-header-card">
+                    <div class="ranking-header-icon">🏆</div>
+                    <div class="ranking-header-content">
+                        <div class="ranking-header-title">共鸣排行榜</div>
+                        <div class="ranking-header-desc">看看哪些心声最能引起大家的共鸣</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="ranking-tabs-section">
+                <div class="ranking-tabs">
+                    <button class="ranking-tab active" data-ranking-period="week">
+                        <span>本周</span>
+                    </button>
+                    <button class="ranking-tab" data-ranking-period="month">
+                        <span>本月</span>
+                    </button>
+                    <button class="ranking-tab" data-ranking-period="all">
+                        <span>历史总榜</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="ranking-list" id="rankingList">
             </section>
         </div>
 

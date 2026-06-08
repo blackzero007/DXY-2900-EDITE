@@ -27,6 +27,10 @@
                 <span class="nav-icon">🌳</span>
                 <span>树洞</span>
             </button>
+            <button class="nav-tab" data-page="capsule">
+                <span class="nav-icon">⏳</span>
+                <span>时光胶囊</span>
+            </button>
             <button class="nav-tab" data-page="favorites">
                 <span class="nav-icon">⭐</span>
                 <span>我的收藏</span>
@@ -65,6 +69,39 @@
                 <div class="post-mood-section">
                     <div class="post-mood-label">今天的心情：</div>
                     <div class="post-moods" id="postMoodSelector"></div>
+                </div>
+                <div class="post-capsule-section">
+                    <div class="post-capsule-label">
+                        <span class="post-capsule-icon">⏳</span>
+                        <span>时光胶囊</span>
+                        <span class="post-capsule-hint">设定一个未来日期，到期才会公开</span>
+                    </div>
+                    <div class="post-capsule-options" id="postCapsuleOptions">
+                        <button class="post-capsule-option active" data-capsule="none">
+                            <span class="capsule-option-icon">📝</span>
+                            <span class="capsule-option-text">普通发布</span>
+                        </button>
+                        <button class="post-capsule-option" data-capsule="3days">
+                            <span class="capsule-option-icon">🌱</span>
+                            <span class="capsule-option-text">3天后</span>
+                        </button>
+                        <button class="post-capsule-option" data-capsule="7days">
+                            <span class="capsule-option-icon">🌿</span>
+                            <span class="capsule-option-text">7天后</span>
+                        </button>
+                        <button class="post-capsule-option" data-capsule="30days">
+                            <span class="capsule-option-icon">🌳</span>
+                            <span class="capsule-option-text">30天后</span>
+                        </button>
+                        <button class="post-capsule-option" data-capsule="custom">
+                            <span class="capsule-option-icon">📅</span>
+                            <span class="capsule-option-text">自定义</span>
+                        </button>
+                    </div>
+                    <div class="post-capsule-date" id="postCapsuleDate" style="display: none;">
+                        <input type="date" id="capsuleDateInput" min="">
+                        <span class="capsule-date-hint">选择一个未来的日期</span>
+                    </div>
                 </div>
                 <textarea 
                     class="post-input" 
@@ -116,6 +153,38 @@
         <section class="messages-section" id="messagesList">
         </section>
 
+        </div>
+
+        <div class="page-content hidden" id="capsulePage">
+            <section class="capsule-header-section">
+                <div class="capsule-header-card">
+                    <div class="capsule-header-icon">⏳</div>
+                    <div class="capsule-header-content">
+                        <div class="capsule-header-title">时光胶囊</div>
+                        <div class="capsule-header-desc">给未来的自己写一封信，在指定的那天，它会准时出现在树洞</div>
+                    </div>
+                    <div class="capsule-count">
+                        <span class="capsule-count-num" id="capsuleCount">0</span>
+                        <span class="capsule-count-unit">个</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="capsule-tabs-section">
+                <div class="capsule-tabs">
+                    <button class="capsule-tab active" data-capsule-tab="pending">
+                        <span>待解锁</span>
+                        <span class="capsule-tab-count" id="pendingCapsuleCount">0</span>
+                    </button>
+                    <button class="capsule-tab" data-capsule-tab="unlocked">
+                        <span>已解锁</span>
+                        <span class="capsule-tab-count" id="unlockedCapsuleCount">0</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="capsule-list" id="capsuleList">
+            </section>
         </div>
 
         <div class="page-content hidden" id="favoritesPage">

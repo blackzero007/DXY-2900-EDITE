@@ -257,6 +257,18 @@ let currentIdentity = null;
 let dailyTopic = '';
 let replyingToMessageId = null;
 let replyIdentity = null;
+let selectedCapsuleOption = 'none';
+let customCapsuleDate = '';
+let currentCapsuleTab = 'pending';
+let countdownTimer = null;
+
+const CAPSULE_OPTIONS = [
+    { key: 'none', label: '普通发布', icon: '📝' },
+    { key: '3days', label: '3天后', icon: '🌱', days: 3 },
+    { key: '7days', label: '7天后', icon: '🌿', days: 7 },
+    { key: '30days', label: '30天后', icon: '🌳', days: 30 },
+    { key: 'custom', label: '自定义', icon: '📅' }
+];
 
 function randomChoice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -290,6 +302,97 @@ function formatTime(timestamp) {
     return `${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
+function getCapsuleUnlockTime(option, customDate) {
+    const now = new Date();
+    const optionConfig = CAPSULE_OPTIONS.find(o => o.key === option);
+
+    if (!optionConfig || option === 'none') {
+        return null;
+    }
+
+    if (option === 'custom' && customDate) {
+        const unlockDate = new Date(customDate);
+        unlockDate.setHours(0, 0, 0, 0);
+        return unlockDate.getTime();
+    }
+
+    if (optionConfig.days) {
+        const unlockDate = new Date(now);
+        unlockDate.setDate(unlockDate.getDate() + optionConfig.days);
+        unlockDate.setHours(0, 0, 0, 0);
+        return unlockDate.getTime();
+    }
+
+    return null;
+}
+
+function isCapsuleUnlocked(msg) {
+    if (!msg || !msg.isCapsule || !msg.unlockTime) {
+        return true;
+    }
+    return Date.now() >= msg.unlockTime;
+}
+
+function isCapsuleJustUnlocked(msg) {
+    if (!isCapsuleUnlocked(msg) || !msg.unlockTime) {
+        return false;
+    }
+    const oneDay = 24 * 60 * 60 * 1000;
+    return Date.now() - msg.unlockTime < oneDay;
+}
+
+function formatCountdown(targetTime) {
+    const now = Date.now();
+    const diff = targetTime - now;
+
+    if (diff <= 0) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    return { days, hours, minutes, seconds, total: diff };
+}
+
+function formatCountdownText(targetTime) {
+    const { days, hours, minutes, total } = formatCountdown(targetTime);
+
+    if (total <= 0) {
+        return '已解锁';
+    }
+
+    if (days > 0) {
+        return `还有 ${days} 天 ${hours} 小时`;
+    }
+    if (hours > 0) {
+        return `还有 ${hours} 小时 ${minutes} 分钟`;
+    }
+    return `还有 ${minutes} 分钟`;
+}
+
+function formatUnlockDate(timestamp) {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}年${month}月${day}日`;
+}
+
+function getCapsuleMessages() {
+    return messages.filter(m => m.isCapsule === true);
+}
+
+function getPendingCapsules() {
+    return getCapsuleMessages().filter(m => !isCapsuleUnlocked(m));
+}
+
+function getUnlockedCapsules() {
+    return getCapsuleMessages().filter(m => isCapsuleUnlocked(m));
+}
+
 function loadMessages() {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -312,6 +415,12 @@ function loadMessages() {
         }
         if (msg.resonates === undefined || msg.resonates === null || isNaN(msg.resonates)) {
             msg.resonates = 0;
+        }
+        if (msg.isCapsule === undefined) {
+            msg.isCapsule = false;
+        }
+        if (msg.unlockTime === undefined) {
+            msg.unlockTime = null;
         }
         if (msg.replies && msg.replies.length > 0) {
             msg.replies.forEach(reply => {
@@ -812,6 +921,12 @@ function getMoodByKey(key) {
 
 function getFilteredMessages() {
     let filtered = [...messages];
+    filtered = filtered.filter(m => {
+        if (m.isCapsule && m.unlockTime) {
+            return isCapsuleUnlocked(m);
+        }
+        return true;
+    });
     if (currentTag !== 'all') {
         filtered = filtered.filter(m => m.tag === currentTag);
     }
@@ -824,16 +939,28 @@ function getFilteredMessages() {
 function getSortedMessages() {
     const filtered = getFilteredMessages();
     const sorted = [...filtered];
+
+    const justUnlocked = sorted.filter(m => isCapsuleJustUnlocked(m));
+    const others = sorted.filter(m => !isCapsuleJustUnlocked(m));
+
     if (currentSort === 'hot') {
-        sorted.sort((a, b) => {
+        others.sort((a, b) => {
             const aResonates = parseInt(a.resonates) || 0;
             const bResonates = parseInt(b.resonates) || 0;
             return bResonates - aResonates || b.timestamp - a.timestamp;
         });
     } else {
-        sorted.sort((a, b) => b.timestamp - a.timestamp);
+        others.sort((a, b) => b.timestamp - a.timestamp);
     }
-    return sorted;
+
+    justUnlocked.sort((a, b) => {
+        if (a.unlockTime && b.unlockTime) {
+            return b.unlockTime - a.unlockTime;
+        }
+        return b.timestamp - a.timestamp;
+    });
+
+    return [...justUnlocked, ...others];
 }
 
 function renderMessages() {
@@ -929,8 +1056,27 @@ function renderMessages() {
             </div>
         ` : '';
 
+        const isCapsule = msg.isCapsule && msg.unlockTime;
+        const justUnlocked = isCapsuleJustUnlocked(msg);
+        const cardClass = justUnlocked ? 'capsule-unlocked' : '';
+
+        const unlockBannerHtml = justUnlocked ? `
+            <div class="capsule-unlock-banner">
+                <span class="capsule-unlock-icon">🎉</span>
+                <span>时光胶囊已解锁！这是一封来自过去的信~</span>
+            </div>
+        ` : '';
+
+        const capsuleBadgeHtml = isCapsule ? `
+            <span class="capsule-badge" title="时光胶囊">
+                <span>⏳</span>
+                <span>时光胶囊</span>
+            </span>
+        ` : '';
+
         return `
-            <div class="message-card" data-id="${msg.id}">
+            <div class="message-card ${cardClass}" data-id="${msg.id}">
+                ${unlockBannerHtml}
                 <div class="message-header">
                     <div class="message-avatar" style="background: ${msg.color}">
                         ${msg.emoji}
@@ -946,6 +1092,7 @@ function renderMessages() {
                     <span class="message-tag" style="background-color: ${tagColor}20; color: ${tagColor}">
                         ${tagLabel}
                     </span>
+                    ${capsuleBadgeHtml}
                 </div>
                 <div class="message-content">${escapeHtml(msg.content)}</div>
                 <div class="message-footer">
@@ -1243,6 +1390,14 @@ function handleSubmit() {
         refreshIdentity();
     }
 
+    const unlockTime = getCapsuleUnlockTime(selectedCapsuleOption, customCapsuleDate);
+    const isCapsule = selectedCapsuleOption !== 'none' && unlockTime !== null;
+
+    if (selectedCapsuleOption === 'custom' && !customCapsuleDate) {
+        alert('请选择一个日期');
+        return;
+    }
+
     const newMessage = {
         id: generateId(),
         content: content,
@@ -1252,7 +1407,9 @@ function handleSubmit() {
         timestamp: Date.now(),
         resonates: 0,
         tag: selectedPostTag,
-        mood: selectedPostMood
+        mood: selectedPostMood,
+        isCapsule: isCapsule,
+        unlockTime: unlockTime
     };
 
     messages.unshift(newMessage);
@@ -1260,6 +1417,10 @@ function handleSubmit() {
 
     input.value = '';
     document.getElementById('charCount').textContent = '0';
+
+    selectedCapsuleOption = 'none';
+    customCapsuleDate = '';
+    renderCapsuleOptions();
 
     refreshIdentity();
 
@@ -1271,9 +1432,13 @@ function handleSubmit() {
     updateSortTabs();
     renderMessages();
 
-    const firstCard = document.querySelector('.message-card');
-    if (firstCard) {
-        firstCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (isCapsule) {
+        switchPage('capsule');
+    } else {
+        const firstCard = document.querySelector('.message-card');
+        if (firstCard) {
+            firstCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 }
 
@@ -1289,7 +1454,13 @@ function updateSortTabs() {
 
 function renderTagFilters() {
     const container = document.getElementById('tagFilters');
-    const allCount = messages.length;
+    const visibleMessages = messages.filter(m => {
+        if (m.isCapsule && m.unlockTime) {
+            return isCapsuleUnlocked(m);
+        }
+        return true;
+    });
+    const allCount = visibleMessages.length;
 
     let html = `
         <button class="tag-filter ${currentTag === 'all' ? 'active' : ''}" data-tag="all">
@@ -1299,7 +1470,7 @@ function renderTagFilters() {
     `;
 
     TAGS.forEach(tag => {
-        const count = messages.filter(m => m.tag === tag.key).length;
+        const count = visibleMessages.filter(m => m.tag === tag.key).length;
         html += `
             <button class="tag-filter ${currentTag === tag.key ? 'active' : ''}" data-tag="${tag.key}" style="--tag-color: ${tag.color}">
                 <span class="tag-dot"></span>
@@ -1405,14 +1576,74 @@ function handlePostMoodSelect(e) {
     updatePostMoodSelector();
 }
 
+function renderCapsuleOptions() {
+    const container = document.getElementById('postCapsuleOptions');
+    if (!container) return;
+
+    const html = CAPSULE_OPTIONS.map(option => `
+        <button class="post-capsule-option ${selectedCapsuleOption === option.key ? 'active' : ''}" data-capsule="${option.key}">
+            <span class="capsule-option-icon">${option.icon}</span>
+            <span class="capsule-option-text">${option.label}</span>
+        </button>
+    `).join('');
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.post-capsule-option').forEach(btn => {
+        btn.addEventListener('click', handleCapsuleOptionSelect);
+    });
+
+    const dateContainer = document.getElementById('postCapsuleDate');
+    if (dateContainer) {
+        if (selectedCapsuleOption === 'custom') {
+            dateContainer.style.display = 'flex';
+            const dateInput = document.getElementById('capsuleDateInput');
+            if (dateInput) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                dateInput.min = tomorrow.toISOString().split('T')[0];
+                if (customCapsuleDate) {
+                    dateInput.value = customCapsuleDate;
+                }
+            }
+        } else {
+            dateContainer.style.display = 'none';
+        }
+    }
+}
+
+function handleCapsuleOptionSelect(e) {
+    const option = e.currentTarget.dataset.capsule;
+    if (option === selectedCapsuleOption) return;
+
+    selectedCapsuleOption = option;
+
+    if (option !== 'custom') {
+        customCapsuleDate = '';
+    }
+
+    renderCapsuleOptions();
+}
+
+function handleCapsuleDateChange(e) {
+    customCapsuleDate = e.target.value;
+}
+
 function renderMoodFilter() {
     const select = document.getElementById('moodFilter');
     if (!select) return;
 
+    const visibleMessages = messages.filter(m => {
+        if (m.isCapsule && m.unlockTime) {
+            return isCapsuleUnlocked(m);
+        }
+        return true;
+    });
+
     let html = '<option value="all">全部心情</option>';
 
     MOODS.forEach(mood => {
-        const count = messages.filter(m => m.mood === mood.key).length;
+        const count = visibleMessages.filter(m => m.mood === mood.key).length;
         html += `
             <option value="${mood.key}" ${currentMood === mood.key ? 'selected' : ''}>
                 ${mood.emoji} ${mood.label} (${count})
@@ -1997,6 +2228,219 @@ function getSampleDriftBottles() {
     ];
 }
 
+function renderCapsulePage() {
+    const container = document.getElementById('capsuleList');
+    const countEl = document.getElementById('capsuleCount');
+    const pendingCountEl = document.getElementById('pendingCapsuleCount');
+    const unlockedCountEl = document.getElementById('unlockedCapsuleCount');
+
+    if (!container) return;
+
+    const allCapsules = getCapsuleMessages();
+    const pendingCapsules = getPendingCapsules();
+    const unlockedCapsules = getUnlockedCapsules();
+
+    if (countEl) {
+        countEl.textContent = allCapsules.length;
+    }
+    if (pendingCountEl) {
+        pendingCountEl.textContent = pendingCapsules.length;
+    }
+    if (unlockedCountEl) {
+        unlockedCountEl.textContent = unlockedCapsules.length;
+    }
+
+    const displayCapsules = currentCapsuleTab === 'pending' ? pendingCapsules : unlockedCapsules;
+
+    if (displayCapsules.length === 0) {
+        let emptyText = '';
+        let emptyIcon = '⏳';
+        if (currentCapsuleTab === 'pending') {
+            emptyText = '还没有待解锁的时光胶囊<br>去树洞里写一封给未来的信吧~';
+        } else {
+            emptyText = '还没有已解锁的时光胶囊<br>耐心等待，时间会给你惊喜~';
+            emptyIcon = '🎉';
+        }
+
+        container.innerHTML = `
+            <div class="capsule-empty">
+                <div class="capsule-empty-icon">${emptyIcon}</div>
+                <div class="capsule-empty-title">暂无胶囊</div>
+                <div class="capsule-empty-desc">${emptyText}</div>
+            </div>
+        `;
+        return;
+    }
+
+    const sorted = [...displayCapsules].sort((a, b) => {
+        if (currentCapsuleTab === 'pending') {
+            return a.unlockTime - b.unlockTime;
+        } else {
+            return b.unlockTime - a.unlockTime;
+        }
+    });
+
+    container.innerHTML = sorted.map(capsule => renderCapsuleCard(capsule)).join('');
+
+    container.querySelectorAll('.capsule-view-btn').forEach(btn => {
+        btn.addEventListener('click', handleCapsuleViewClick);
+    });
+}
+
+function renderCapsuleCard(capsule) {
+    const isUnlocked = isCapsuleUnlocked(capsule);
+    const cardClass = isUnlocked ? 'unlocked' : 'locked';
+    const tag = getTagByKey(capsule.tag);
+    const tagColor = tag ? tag.color : '#ccc';
+    const tagLabel = tag ? tag.label : '';
+    const mood = getMoodByKey(capsule.mood);
+    const moodEmoji = mood ? mood.emoji : '😊';
+
+    const countdown = formatCountdown(capsule.unlockTime);
+    const countdownHtml = !isUnlocked ? `
+        <div class="capsule-countdown-large">
+            <div class="countdown-item">
+                <span class="countdown-number" data-capsule-id="${capsule.id}" data-unit="days">${String(countdown.days).padStart(2, '0')}</span>
+                <span class="countdown-label">天</span>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+                <span class="countdown-number" data-capsule-id="${capsule.id}" data-unit="hours">${String(countdown.hours).padStart(2, '0')}</span>
+                <span class="countdown-label">时</span>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+                <span class="countdown-number" data-capsule-id="${capsule.id}" data-unit="minutes">${String(countdown.minutes).padStart(2, '0')}</span>
+                <span class="countdown-label">分</span>
+            </div>
+            <span class="countdown-separator">:</span>
+            <div class="countdown-item">
+                <span class="countdown-number" data-capsule-id="${capsule.id}" data-unit="seconds">${String(countdown.seconds).padStart(2, '0')}</span>
+                <span class="countdown-label">秒</span>
+            </div>
+        </div>
+    ` : '';
+
+    const viewBtnHtml = isUnlocked ? `
+        <button class="capsule-view-btn" data-id="${capsule.id}">
+            <span>👁️</span>
+            <span>查看详情</span>
+        </button>
+    ` : '';
+
+    return `
+        <div class="capsule-card ${cardClass}" data-id="${capsule.id}">
+            <div class="capsule-card-header">
+                <div class="capsule-card-avatar" style="background: ${capsule.color}">
+                    ${capsule.emoji}
+                </div>
+                <div class="capsule-card-info">
+                    <div class="capsule-card-nickname">${capsule.nickname}</div>
+                    <div class="capsule-card-time">${formatTime(capsule.timestamp)}封存</div>
+                </div>
+                <span class="capsule-card-tag">
+                    <span>⏳</span>
+                    <span>时光胶囊</span>
+                </span>
+            </div>
+            ${countdownHtml}
+            <div class="capsule-card-content">${escapeHtml(capsule.content)}</div>
+            <div class="capsule-card-footer">
+                <div class="capsule-unlock-date">
+                    <span class="capsule-unlock-date-icon">📅</span>
+                    <span>${isUnlocked ? '已解锁' : '解锁日期：' + formatUnlockDate(capsule.unlockTime)}</span>
+                </div>
+                ${viewBtnHtml}
+            </div>
+        </div>
+    `;
+}
+
+function handleCapsuleViewClick(e) {
+    const id = e.currentTarget.dataset.id;
+    const capsule = messages.find(m => m.id === id);
+    if (!capsule) return;
+
+    switchPage('treehole');
+
+    setTimeout(() => {
+        const msgCard = document.querySelector(`.message-card[data-id="${id}"]`);
+        if (msgCard) {
+            msgCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            msgCard.style.animation = 'none';
+            msgCard.offsetHeight;
+            msgCard.style.animation = 'pulse 0.6s ease-in-out 2';
+        }
+    }, 100);
+}
+
+function handleCapsuleTabChange(e) {
+    const tab = e.currentTarget.dataset.capsuleTab;
+    if (tab === currentCapsuleTab) return;
+
+    currentCapsuleTab = tab;
+    updateCapsuleTabs();
+    renderCapsulePage();
+}
+
+function updateCapsuleTabs() {
+    document.querySelectorAll('.capsule-tab').forEach(tab => {
+        if (tab.dataset.capsuleTab === currentCapsuleTab) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+}
+
+function startCountdownTimer() {
+    if (countdownTimer) {
+        clearInterval(countdownTimer);
+    }
+
+    countdownTimer = setInterval(() => {
+        if (currentPage === 'capsule') {
+            updateCountdowns();
+        }
+        checkCapsuleUnlocks();
+    }, 1000);
+}
+
+function updateCountdowns() {
+    const pendingCapsules = getPendingCapsules();
+
+    pendingCapsules.forEach(capsule => {
+        const countdown = formatCountdown(capsule.unlockTime);
+
+        const dayEl = document.querySelector(`.countdown-number[data-capsule-id="${capsule.id}"][data-unit="days"]`);
+        const hourEl = document.querySelector(`.countdown-number[data-capsule-id="${capsule.id}"][data-unit="hours"]`);
+        const minuteEl = document.querySelector(`.countdown-number[data-capsule-id="${capsule.id}"][data-unit="minutes"]`);
+        const secondEl = document.querySelector(`.countdown-number[data-capsule-id="${capsule.id}"][data-unit="seconds"]`);
+
+        if (dayEl) dayEl.textContent = String(countdown.days).padStart(2, '0');
+        if (hourEl) hourEl.textContent = String(countdown.hours).padStart(2, '0');
+        if (minuteEl) minuteEl.textContent = String(countdown.minutes).padStart(2, '0');
+        if (secondEl) secondEl.textContent = String(countdown.seconds).padStart(2, '0');
+    });
+}
+
+let lastPendingCount = -1;
+
+function checkCapsuleUnlocks() {
+    const pendingCount = getPendingCapsules().length;
+
+    if (lastPendingCount !== -1 && pendingCount < lastPendingCount) {
+        renderMessages();
+        renderTagFilters();
+        renderMoodFilter();
+        if (currentPage === 'capsule') {
+            renderCapsulePage();
+        }
+    }
+
+    lastPendingCount = pendingCount;
+}
+
 function switchPage(page) {
     if (page === currentPage) return;
 
@@ -2017,6 +2461,10 @@ function switchPage(page) {
             content.classList.add('hidden');
         }
     });
+
+    if (page === 'capsule') {
+        renderCapsulePage();
+    }
 
     if (page === 'drift') {
         renderDriftStats();
@@ -2570,10 +3018,12 @@ function init() {
     renderTagFilters();
     renderPostTagSelector();
     renderPostMoodSelector();
+    renderCapsuleOptions();
     renderMoodFilter();
     renderMessages();
     renderThemeSelector();
     scheduleDailyRefresh();
+    startCountdownTimer();
 
     initDrift();
 
@@ -2625,6 +3075,15 @@ function init() {
     if (settingsOverlay) {
         settingsOverlay.addEventListener('click', closeSettingsPanel);
     }
+
+    const capsuleDateInput = document.getElementById('capsuleDateInput');
+    if (capsuleDateInput) {
+        capsuleDateInput.addEventListener('change', handleCapsuleDateChange);
+    }
+
+    document.querySelectorAll('.capsule-tab').forEach(tab => {
+        tab.addEventListener('click', handleCapsuleTabChange);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', init);

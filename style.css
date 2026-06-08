@@ -8,15 +8,20 @@
     --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --card-bg: white;
     --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     --card-border: none;
     --accent-color: #667eea;
     --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --secondary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     --text-primary: #333;
     --text-secondary: #555;
     --text-muted: #aaa;
     --input-bg: #ffffff;
     --input-border: #f0f0f0;
     --button-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --button-secondary-bg: #f8f9fa;
+    --button-secondary-hover-bg: #e8f0fe;
     --tag-filter-bg: rgba(255, 255, 255, 0.2);
     --tag-filter-active-bg: white;
     --tag-filter-active-color: #667eea;
@@ -1086,15 +1091,16 @@ body {
 }
 
 .drift-hero-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-shadow);
     display: flex;
     align-items: center;
     gap: 20px;
     backdrop-filter: blur(10px);
     animation: fadeIn 0.5s ease-out;
+    border: var(--card-border);
 }
 
 .drift-hero-icon {
@@ -1110,13 +1116,13 @@ body {
 .drift-hero-title {
     font-size: 20px;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 6px;
 }
 
 .drift-hero-desc {
     font-size: 13px;
-    color: #888;
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
@@ -1128,13 +1134,13 @@ body {
 }
 
 .drift-action-btn {
-    background: white;
-    border: none;
+    background: var(--card-bg);
+    border: var(--card-border);
     border-radius: 20px;
     padding: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-shadow);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1144,7 +1150,7 @@ body {
 
 .drift-action-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .drift-action-btn:active {
@@ -1152,7 +1158,7 @@ body {
 }
 
 .throw-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     color: white;
 }
 
@@ -1161,7 +1167,7 @@ body {
 }
 
 .pick-btn {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: var(--secondary-gradient);
     color: white;
 }
 
@@ -1191,12 +1197,13 @@ body {
 }
 
 .drift-stat-item {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--card-bg);
     border-radius: 16px;
     padding: 16px 12px;
     text-align: center;
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
 }
 
 .drift-stat-icon {
@@ -1207,7 +1214,7 @@ body {
 
 .drift-stat-label {
     font-size: 12px;
-    color: #888;
+    color: var(--text-muted);
     display: block;
     margin-bottom: 4px;
 }
@@ -1215,13 +1222,13 @@ body {
 .drift-stat-value {
     font-size: 24px;
     font-weight: 700;
-    color: #667eea;
+    color: var(--accent-color);
     display: inline-block;
 }
 
 .drift-stat-unit {
     font-size: 12px;
-    color: #888;
+    color: var(--text-muted);
     margin-left: 2px;
 }
 
@@ -1261,15 +1268,16 @@ body {
 }
 
 .drift-bottle-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 18px;
     padding: 18px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-shadow);
     animation: bottleFloat 0.5s ease-out;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    border: var(--card-border);
 }
 
 .drift-bottle-card::before {
@@ -1279,16 +1287,16 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
 }
 
 .drift-bottle-card.is-reply::before {
-    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    background: var(--success-gradient);
 }
 
 .drift-bottle-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-hover-shadow);
 }
 
 @keyframes bottleFloat {
@@ -1328,13 +1336,13 @@ body {
 .drift-bottle-nickname {
     font-weight: 600;
     font-size: 14px;
-    color: #444;
+    color: var(--text-primary);
     margin-bottom: 2px;
 }
 
 .drift-bottle-time {
     font-size: 12px;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 .drift-bottle-tag {
@@ -1343,19 +1351,19 @@ body {
     padding: 3px 10px;
     border-radius: 12px;
     flex-shrink: 0;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    background: var(--tag-filter-bg);
+    color: var(--accent-color);
 }
 
 .drift-bottle-tag.reply-tag {
     background: rgba(67, 233, 123, 0.15);
-    color: #2ecc71;
+    color: var(--accent-color);
 }
 
 .drift-bottle-content {
     font-size: 14px;
     line-height: 1.7;
-    color: #333;
+    color: var(--text-primary);
     word-break: break-word;
     margin-bottom: 14px;
 }
@@ -1365,7 +1373,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--divider-color);
 }
 
 .drift-bottle-stats {
@@ -1390,23 +1398,23 @@ body {
     display: flex;
     align-items: center;
     gap: 5px;
-    background: #f8f9fa;
+    background: var(--button-secondary-bg);
     border: none;
     padding: 6px 14px;
     border-radius: 16px;
     font-size: 12px;
-    color: #666;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .drift-bottle-btn:hover {
-    background: #e8f0fe;
-    color: #667eea;
+    background: var(--button-secondary-hover-bg);
+    color: var(--accent-color);
 }
 
 .drift-bottle-btn.reply-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     color: white;
 }
 
@@ -1416,7 +1424,7 @@ body {
 }
 
 .drift-bottle-btn.throw-back-btn {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: var(--secondary-gradient);
     color: white;
 }
 
@@ -1426,13 +1434,14 @@ body {
 }
 
 .drift-bottle-detail {
-    background: white;
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-shadow);
     animation: popIn 0.4s ease-out;
     position: relative;
     overflow: hidden;
+    border: var(--card-border);
 }
 
 .drift-bottle-detail::before {
@@ -1442,11 +1451,11 @@ body {
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
 }
 
 .drift-bottle-detail.is-reply::before {
-    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+    background: var(--success-gradient);
 }
 
 @keyframes popIn {
@@ -1487,13 +1496,13 @@ body {
 .drift-detail-nickname {
     font-weight: 600;
     font-size: 16px;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .drift-detail-time {
     font-size: 13px;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 .drift-detail-tag {
@@ -1501,19 +1510,19 @@ body {
     font-weight: 600;
     padding: 4px 12px;
     border-radius: 14px;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    background: var(--tag-filter-bg);
+    color: var(--accent-color);
 }
 
 .drift-detail-tag.reply-tag {
     background: rgba(67, 233, 123, 0.15);
-    color: #2ecc71;
+    color: var(--accent-color);
 }
 
 .drift-detail-content {
     font-size: 15px;
     line-height: 1.8;
-    color: #333;
+    color: var(--text-primary);
     word-break: break-word;
     margin-bottom: 20px;
 }
@@ -1531,24 +1540,24 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: #f8f9fa;
+    background: var(--button-secondary-bg);
     border: none;
     padding: 12px 20px;
     border-radius: 14px;
     font-size: 14px;
     font-weight: 500;
-    color: #666;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .drift-detail-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-shadow);
 }
 
 .drift-detail-btn.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     color: white;
 }
 
@@ -1557,7 +1566,7 @@ body {
 }
 
 .drift-detail-btn.success {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: var(--success-gradient);
     color: white;
 }
 
@@ -1568,13 +1577,13 @@ body {
 .drift-reply-section {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--divider-color);
 }
 
 .drift-reply-title {
     font-size: 14px;
     font-weight: 600;
-    color: #444;
+    color: var(--text-primary);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -1582,7 +1591,7 @@ body {
 }
 
 .drift-reply-form {
-    background: #f7f8fc;
+    background: var(--reply-bg);
     border-radius: 14px;
     padding: 16px;
 }
@@ -1607,7 +1616,7 @@ body {
 .drift-reply-nickname {
     font-weight: 600;
     font-size: 13px;
-    color: #555;
+    color: var(--text-primary);
     flex: 1;
 }
 
@@ -1615,26 +1624,26 @@ body {
     width: 26px;
     height: 26px;
     border: none;
-    background: #e8e8e8;
+    background: var(--button-secondary-bg);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #888;
+    color: var(--text-muted);
     transition: all 0.2s;
 }
 
 .drift-reply-refresh:hover {
-    background: #d8d8d8;
-    color: #667eea;
+    background: var(--button-secondary-hover-bg);
+    color: var(--accent-color);
     transform: rotate(180deg);
 }
 
 .drift-reply-input {
     width: 100%;
     min-height: 80px;
-    border: 2px solid #e8e8e8;
+    border: 2px solid var(--input-border);
     border-radius: 10px;
     padding: 10px 12px;
     font-size: 14px;
@@ -1643,15 +1652,16 @@ body {
     outline: none;
     transition: border-color 0.2s;
     line-height: 1.5;
-    background: white;
+    background: var(--input-bg);
+    color: var(--text-primary);
 }
 
 .drift-reply-input:focus {
-    border-color: #667eea;
+    border-color: var(--accent-color);
 }
 
 .drift-reply-input::placeholder {
-    color: #bbb;
+    color: var(--text-muted);
 }
 
 .drift-reply-footer {
@@ -1663,11 +1673,11 @@ body {
 
 .drift-reply-char-count {
     font-size: 12px;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 .drift-reply-submit {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     color: white;
     border: none;
     padding: 8px 20px;
@@ -1719,29 +1729,30 @@ body {
     gap: 12px;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px dashed #e0e0e0;
+    border-top: 1px dashed var(--divider-color);
 }
 
 .drift-picked-meta-item {
     font-size: 12px;
-    color: #999;
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
 .drift-write-modal {
-    background: white;
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-shadow);
     animation: popIn 0.3s ease-out;
+    border: var(--card-border);
 }
 
 .drift-write-title {
     font-size: 18px;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 16px;
     display: flex;
     align-items: center;
@@ -1772,7 +1783,7 @@ body {
 .drift-write-nickname {
     font-weight: 600;
     font-size: 15px;
-    color: #444;
+    color: var(--text-primary);
     flex: 1;
 }
 
@@ -1780,26 +1791,26 @@ body {
     width: 30px;
     height: 30px;
     border: none;
-    background: #f0f0f0;
+    background: var(--button-secondary-bg);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #888;
+    color: var(--text-muted);
     transition: all 0.2s;
 }
 
 .drift-write-refresh:hover {
-    background: #e0e0e0;
-    color: #667eea;
+    background: var(--button-secondary-hover-bg);
+    color: var(--accent-color);
     transform: rotate(180deg);
 }
 
 .drift-write-input {
     width: 100%;
     min-height: 120px;
-    border: 2px solid #f0f0f0;
+    border: 2px solid var(--input-border);
     border-radius: 14px;
     padding: 14px;
     font-size: 15px;
@@ -1808,14 +1819,16 @@ body {
     outline: none;
     transition: border-color 0.2s;
     line-height: 1.6;
+    background: var(--input-bg);
+    color: var(--text-primary);
 }
 
 .drift-write-input:focus {
-    border-color: #667eea;
+    border-color: var(--accent-color);
 }
 
 .drift-write-input::placeholder {
-    color: #bbb;
+    color: var(--text-muted);
 }
 
 .drift-write-footer {
@@ -1827,7 +1840,7 @@ body {
 
 .drift-write-char-count {
     font-size: 13px;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 .drift-write-actions {
@@ -1836,8 +1849,8 @@ body {
 }
 
 .drift-write-cancel {
-    background: #f0f0f0;
-    color: #666;
+    background: var(--button-secondary-bg);
+    color: var(--text-secondary);
     border: none;
     padding: 10px 22px;
     border-radius: 20px;
@@ -1848,11 +1861,11 @@ body {
 }
 
 .drift-write-cancel:hover {
-    background: #e0e0e0;
+    background: var(--button-secondary-hover-bg);
 }
 
 .drift-write-submit {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--accent-gradient);
     color: white;
     border: none;
     padding: 10px 24px;
@@ -1946,15 +1959,16 @@ body {
 }
 
 .favorites-header-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-shadow);
     display: flex;
     align-items: center;
     gap: 20px;
     backdrop-filter: blur(10px);
     animation: fadeIn 0.5s ease-out;
+    border: var(--card-border);
 }
 
 .favorites-header-icon {
@@ -1971,13 +1985,13 @@ body {
 .favorites-header-title {
     font-size: 20px;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 6px;
 }
 
 .favorites-header-desc {
     font-size: 13px;
-    color: #888;
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
@@ -1990,13 +2004,13 @@ body {
     display: block;
     font-size: 32px;
     font-weight: 700;
-    color: #f5a623;
+    color: var(--accent-color);
     line-height: 1;
 }
 
 .favorites-count-unit {
     font-size: 12px;
-    color: #999;
+    color: var(--text-muted);
     margin-top: 4px;
     display: block;
 }
@@ -2027,13 +2041,13 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #ffd86b 0%, #ffb347 100%);
+    background: var(--accent-gradient);
     border-radius: 20px 20px 0 0;
 }
 
 .favorite-time {
     font-size: 12px;
-    color: #f5a623;
+    color: var(--accent-color);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -2043,10 +2057,12 @@ body {
 .favorites-empty {
     text-align: center;
     padding: 60px 20px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--card-bg);
     border-radius: 20px;
     backdrop-filter: blur(10px);
     animation: fadeIn 0.4s ease-out;
+    border: var(--card-border);
+    box-shadow: var(--card-shadow);
 }
 
 .favorites-empty-icon {
@@ -2058,13 +2074,13 @@ body {
 .favorites-empty-title {
     font-size: 16px;
     font-weight: 600;
-    color: #555;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .favorites-empty-desc {
     font-size: 13px;
-    color: #999;
+    color: var(--text-muted);
     line-height: 1.6;
 }
 
@@ -2073,15 +2089,16 @@ body {
 }
 
 .ranking-header-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    background: var(--card-bg);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-shadow);
     display: flex;
     align-items: center;
     gap: 20px;
     backdrop-filter: blur(10px);
     animation: fadeIn 0.5s ease-out;
+    border: var(--card-border);
 }
 
 .ranking-header-icon {
@@ -2098,13 +2115,13 @@ body {
 .ranking-header-title {
     font-size: 20px;
     font-weight: 700;
-    color: #333;
+    color: var(--text-primary);
     margin-bottom: 6px;
 }
 
 .ranking-header-desc {
     font-size: 13px;
-    color: #888;
+    color: var(--text-secondary);
     line-height: 1.5;
 }
 
@@ -2115,7 +2132,7 @@ body {
 .ranking-tabs {
     display: flex;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--tag-filter-bg);
     padding: 6px;
     border-radius: 30px;
     backdrop-filter: blur(10px);
@@ -2140,9 +2157,9 @@ body {
 }
 
 .ranking-tab.active {
-    background: white;
-    color: #667eea;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: var(--tag-filter-active-bg);
+    color: var(--tag-filter-active-color);
+    box-shadow: var(--card-shadow);
 }
 
 .ranking-list {
@@ -2153,10 +2170,10 @@ body {
 }
 
 .ranking-item {
-    background: white;
+    background: var(--card-bg);
     border-radius: 16px;
     padding: 16px 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-shadow);
     display: flex;
     align-items: center;
     gap: 16px;
@@ -2164,11 +2181,12 @@ body {
     transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
+    border: var(--card-border);
 }
 
 .ranking-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .ranking-item.top-1::before,
@@ -2204,8 +2222,8 @@ body {
     font-weight: 700;
     font-size: 16px;
     flex-shrink: 0;
-    background: #f0f0f0;
-    color: #888;
+    background: var(--button-secondary-bg);
+    color: var(--text-muted);
 }
 
 .ranking-item.top-1 .rank-badge {
@@ -2245,13 +2263,13 @@ body {
 .ranking-nickname {
     font-weight: 600;
     font-size: 14px;
-    color: #444;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .ranking-content {
     font-size: 13px;
-    color: #666;
+    color: var(--text-secondary);
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -2270,21 +2288,23 @@ body {
 .ranking-resonate-count {
     font-size: 20px;
     font-weight: 700;
-    color: #f5576c;
+    color: var(--accent-color);
 }
 
 .ranking-resonate-label {
     font-size: 11px;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 .ranking-empty {
     text-align: center;
     padding: 60px 20px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--card-bg);
     border-radius: 20px;
     backdrop-filter: blur(10px);
     animation: fadeIn 0.4s ease-out;
+    border: var(--card-border);
+    box-shadow: var(--card-shadow);
 }
 
 .ranking-empty-icon {
@@ -2296,13 +2316,13 @@ body {
 .ranking-empty-title {
     font-size: 16px;
     font-weight: 600;
-    color: #555;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .ranking-empty-desc {
     font-size: 13px;
-    color: #999;
+    color: var(--text-muted);
     line-height: 1.6;
 }
 

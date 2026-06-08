@@ -109,15 +109,20 @@ const THEMES = {
         bgGradient: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
         cardBg: 'rgba(255, 255, 255, 0.08)',
         cardShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+        cardHoverShadow: '0 12px 40px rgba(0, 0, 0, 0.5)',
         cardBorder: '1px solid rgba(255, 255, 255, 0.1)',
         accentColor: '#a855f7',
         accentGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        successGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        secondaryGradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
         textPrimary: '#f1f5f9',
         textSecondary: 'rgba(241, 245, 249, 0.7)',
         textMuted: 'rgba(241, 245, 249, 0.5)',
         inputBg: 'rgba(255, 255, 255, 0.06)',
         inputBorder: 'rgba(255, 255, 255, 0.12)',
         buttonBg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        buttonSecondaryBg: 'rgba(255, 255, 255, 0.06)',
+        buttonSecondaryHoverBg: 'rgba(168, 85, 247, 0.15)',
         tagFilterBg: 'rgba(255, 255, 255, 0.1)',
         tagFilterActiveBg: 'rgba(255, 255, 255, 0.95)',
         tagFilterActiveColor: '#302b63',
@@ -131,15 +136,20 @@ const THEMES = {
         bgGradient: 'linear-gradient(135deg, #1a2980 0%, #26d0ce 100%)',
         cardBg: 'rgba(255, 255, 255, 0.92)',
         cardShadow: '0 10px 40px rgba(0, 50, 100, 0.2)',
+        cardHoverShadow: '0 14px 50px rgba(0, 50, 100, 0.3)',
         cardBorder: 'none',
         accentColor: '#0ea5e9',
         accentGradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+        successGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        secondaryGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
         textPrimary: '#1e293b',
         textSecondary: '#64748b',
         textMuted: '#94a3b8',
         inputBg: '#ffffff',
         inputBorder: '#e2e8f0',
         buttonBg: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+        buttonSecondaryBg: '#f1f5f9',
+        buttonSecondaryHoverBg: '#e0f2fe',
         tagFilterBg: 'rgba(255, 255, 255, 0.2)',
         tagFilterActiveBg: '#ffffff',
         tagFilterActiveColor: '#0ea5e9',
@@ -153,15 +163,20 @@ const THEMES = {
         bgGradient: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
         cardBg: 'rgba(255, 255, 255, 0.95)',
         cardShadow: '0 8px 32px rgba(20, 60, 40, 0.25)',
+        cardHoverShadow: '0 12px 40px rgba(20, 60, 40, 0.35)',
         cardBorder: 'none',
         accentColor: '#059669',
         accentGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        successGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        secondaryGradient: 'linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)',
         textPrimary: '#1f2937',
         textSecondary: '#6b7280',
         textMuted: '#9ca3af',
         inputBg: '#ffffff',
         inputBorder: '#e5e7eb',
         buttonBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        buttonSecondaryBg: '#f9fafb',
+        buttonSecondaryHoverBg: '#ecfdf5',
         tagFilterBg: 'rgba(255, 255, 255, 0.2)',
         tagFilterActiveBg: '#ffffff',
         tagFilterActiveColor: '#059669',
@@ -175,15 +190,20 @@ const THEMES = {
         bgGradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
         cardBg: 'rgba(255, 255, 255, 0.95)',
         cardShadow: '0 10px 40px rgba(255, 150, 150, 0.25)',
+        cardHoverShadow: '0 14px 50px rgba(255, 150, 150, 0.35)',
         cardBorder: 'none',
         accentColor: '#ec4899',
         accentGradient: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+        successGradient: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+        secondaryGradient: 'linear-gradient(135deg, #fb923c 0%, #f97316 100%)',
         textPrimary: '#831843',
         textSecondary: '#9d174d',
         textMuted: '#be185d',
         inputBg: '#ffffff',
         inputBorder: '#fbcfe8',
         buttonBg: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+        buttonSecondaryBg: '#fdf2f8',
+        buttonSecondaryHoverBg: '#fce7f3',
         tagFilterBg: 'rgba(255, 255, 255, 0.5)',
         tagFilterActiveBg: '#ffffff',
         tagFilterActiveColor: '#ec4899',
@@ -197,15 +217,20 @@ const THEMES = {
         bgGradient: 'linear-gradient(135deg, #43cea2 0%, #185a9d 50%, #667eea 100%)',
         cardBg: 'rgba(255, 255, 255, 0.9)',
         cardShadow: '0 12px 48px rgba(30, 60, 120, 0.3)',
+        cardHoverShadow: '0 16px 60px rgba(30, 60, 120, 0.4)',
         cardBorder: 'none',
         accentColor: '#8b5cf6',
         accentGradient: 'linear-gradient(135deg, #43cea2 0%, #667eea 100%)',
+        successGradient: 'linear-gradient(135deg, #43cea2 0%, #10b981 100%)',
+        secondaryGradient: 'linear-gradient(135deg, #3b82f6 0%, #667eea 100%)',
         textPrimary: '#1e1b4b',
         textSecondary: '#4c1d95',
         textMuted: '#6d28d9',
         inputBg: '#ffffff',
         inputBorder: '#c4b5fd',
         buttonBg: 'linear-gradient(135deg, #43cea2 0%, #667eea 100%)',
+        buttonSecondaryBg: '#f5f3ff',
+        buttonSecondaryHoverBg: '#ede9fe',
         tagFilterBg: 'rgba(255, 255, 255, 0.25)',
         tagFilterActiveBg: '#ffffff',
         tagFilterActiveColor: '#667eea',
@@ -415,15 +440,20 @@ function applyTheme(themeKey) {
     root.style.setProperty('--bg-gradient', theme.bgGradient);
     root.style.setProperty('--card-bg', theme.cardBg);
     root.style.setProperty('--card-shadow', theme.cardShadow);
+    root.style.setProperty('--card-hover-shadow', theme.cardHoverShadow);
     root.style.setProperty('--card-border', theme.cardBorder);
     root.style.setProperty('--accent-color', theme.accentColor);
     root.style.setProperty('--accent-gradient', theme.accentGradient);
+    root.style.setProperty('--success-gradient', theme.successGradient);
+    root.style.setProperty('--secondary-gradient', theme.secondaryGradient);
     root.style.setProperty('--text-primary', theme.textPrimary);
     root.style.setProperty('--text-secondary', theme.textSecondary);
     root.style.setProperty('--text-muted', theme.textMuted);
     root.style.setProperty('--input-bg', theme.inputBg);
     root.style.setProperty('--input-border', theme.inputBorder);
     root.style.setProperty('--button-bg', theme.buttonBg);
+    root.style.setProperty('--button-secondary-bg', theme.buttonSecondaryBg);
+    root.style.setProperty('--button-secondary-hover-bg', theme.buttonSecondaryHoverBg);
     root.style.setProperty('--tag-filter-bg', theme.tagFilterBg);
     root.style.setProperty('--tag-filter-active-bg', theme.tagFilterActiveBg);
     root.style.setProperty('--tag-filter-active-color', theme.tagFilterActiveColor);

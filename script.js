@@ -349,6 +349,7 @@ function handleSubmit() {
     refreshIdentity();
 
     currentTag = 'all';
+    currentSort = 'new';
     renderTagFilters();
     updateSortTabs();
     renderMessages();

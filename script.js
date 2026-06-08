@@ -99,6 +99,122 @@ const RESONATED_KEY = 'tree_hole_resonated';
 const REPLY_RESONATED_KEY = 'tree_hole_reply_resonated';
 const EXPANDED_REPLIES_KEY = 'tree_hole_expanded_replies';
 const FAVORITES_KEY = 'tree_hole_favorites';
+const THEME_KEY = 'tree_hole_theme';
+
+const THEMES = {
+    starry: {
+        key: 'starry',
+        label: '星空',
+        icon: '🌌',
+        bgGradient: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+        cardBg: 'rgba(255, 255, 255, 0.08)',
+        cardShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+        cardBorder: '1px solid rgba(255, 255, 255, 0.1)',
+        accentColor: '#a855f7',
+        accentGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        textPrimary: '#f1f5f9',
+        textSecondary: 'rgba(241, 245, 249, 0.7)',
+        textMuted: 'rgba(241, 245, 249, 0.5)',
+        inputBg: 'rgba(255, 255, 255, 0.06)',
+        inputBorder: 'rgba(255, 255, 255, 0.12)',
+        buttonBg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        tagFilterBg: 'rgba(255, 255, 255, 0.1)',
+        tagFilterActiveBg: 'rgba(255, 255, 255, 0.95)',
+        tagFilterActiveColor: '#302b63',
+        replyBg: 'rgba(255, 255, 255, 0.04)',
+        dividerColor: 'rgba(255, 255, 255, 0.08)'
+    },
+    ocean: {
+        key: 'ocean',
+        label: '海洋',
+        icon: '🌊',
+        bgGradient: 'linear-gradient(135deg, #1a2980 0%, #26d0ce 100%)',
+        cardBg: 'rgba(255, 255, 255, 0.92)',
+        cardShadow: '0 10px 40px rgba(0, 50, 100, 0.2)',
+        cardBorder: 'none',
+        accentColor: '#0ea5e9',
+        accentGradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+        textPrimary: '#1e293b',
+        textSecondary: '#64748b',
+        textMuted: '#94a3b8',
+        inputBg: '#ffffff',
+        inputBorder: '#e2e8f0',
+        buttonBg: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+        tagFilterBg: 'rgba(255, 255, 255, 0.2)',
+        tagFilterActiveBg: '#ffffff',
+        tagFilterActiveColor: '#0ea5e9',
+        replyBg: '#f8fafc',
+        dividerColor: '#e2e8f0'
+    },
+    forest: {
+        key: 'forest',
+        label: '森林',
+        icon: '🌲',
+        bgGradient: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)',
+        cardBg: 'rgba(255, 255, 255, 0.95)',
+        cardShadow: '0 8px 32px rgba(20, 60, 40, 0.25)',
+        cardBorder: 'none',
+        accentColor: '#059669',
+        accentGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        textPrimary: '#1f2937',
+        textSecondary: '#6b7280',
+        textMuted: '#9ca3af',
+        inputBg: '#ffffff',
+        inputBorder: '#e5e7eb',
+        buttonBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        tagFilterBg: 'rgba(255, 255, 255, 0.2)',
+        tagFilterActiveBg: '#ffffff',
+        tagFilterActiveColor: '#059669',
+        replyBg: '#f0fdf4',
+        dividerColor: '#e5e7eb'
+    },
+    sakura: {
+        key: 'sakura',
+        label: '樱花',
+        icon: '🌸',
+        bgGradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+        cardBg: 'rgba(255, 255, 255, 0.95)',
+        cardShadow: '0 10px 40px rgba(255, 150, 150, 0.25)',
+        cardBorder: 'none',
+        accentColor: '#ec4899',
+        accentGradient: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+        textPrimary: '#831843',
+        textSecondary: '#9d174d',
+        textMuted: '#be185d',
+        inputBg: '#ffffff',
+        inputBorder: '#fbcfe8',
+        buttonBg: 'linear-gradient(135deg, #f472b6 0%, #ec4899 100%)',
+        tagFilterBg: 'rgba(255, 255, 255, 0.5)',
+        tagFilterActiveBg: '#ffffff',
+        tagFilterActiveColor: '#ec4899',
+        replyBg: '#fdf2f8',
+        dividerColor: '#fbcfe8'
+    },
+    aurora: {
+        key: 'aurora',
+        label: '极光',
+        icon: '✨',
+        bgGradient: 'linear-gradient(135deg, #43cea2 0%, #185a9d 50%, #667eea 100%)',
+        cardBg: 'rgba(255, 255, 255, 0.9)',
+        cardShadow: '0 12px 48px rgba(30, 60, 120, 0.3)',
+        cardBorder: 'none',
+        accentColor: '#8b5cf6',
+        accentGradient: 'linear-gradient(135deg, #43cea2 0%, #667eea 100%)',
+        textPrimary: '#1e1b4b',
+        textSecondary: '#4c1d95',
+        textMuted: '#6d28d9',
+        inputBg: '#ffffff',
+        inputBorder: '#c4b5fd',
+        buttonBg: 'linear-gradient(135deg, #43cea2 0%, #667eea 100%)',
+        tagFilterBg: 'rgba(255, 255, 255, 0.25)',
+        tagFilterActiveBg: '#ffffff',
+        tagFilterActiveColor: '#667eea',
+        replyBg: '#f5f3ff',
+        dividerColor: '#c4b5fd'
+    }
+};
+
+let currentTheme = 'starry';
 
 let messages = [];
 let resonatedIds = new Set();
@@ -269,6 +385,99 @@ function saveFavorites() {
         localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favoriteIds]));
     } catch (e) {
         console.error('保存收藏失败:', e);
+    }
+}
+
+function loadTheme() {
+    try {
+        const stored = localStorage.getItem(THEME_KEY);
+        if (stored && THEMES[stored]) {
+            currentTheme = stored;
+        }
+    } catch (e) {
+        currentTheme = 'starry';
+    }
+}
+
+function saveTheme() {
+    try {
+        localStorage.setItem(THEME_KEY, currentTheme);
+    } catch (e) {
+        console.error('保存主题失败:', e);
+    }
+}
+
+function applyTheme(themeKey) {
+    const theme = THEMES[themeKey];
+    if (!theme) return;
+
+    const root = document.documentElement;
+    root.style.setProperty('--bg-gradient', theme.bgGradient);
+    root.style.setProperty('--card-bg', theme.cardBg);
+    root.style.setProperty('--card-shadow', theme.cardShadow);
+    root.style.setProperty('--card-border', theme.cardBorder);
+    root.style.setProperty('--accent-color', theme.accentColor);
+    root.style.setProperty('--accent-gradient', theme.accentGradient);
+    root.style.setProperty('--text-primary', theme.textPrimary);
+    root.style.setProperty('--text-secondary', theme.textSecondary);
+    root.style.setProperty('--text-muted', theme.textMuted);
+    root.style.setProperty('--input-bg', theme.inputBg);
+    root.style.setProperty('--input-border', theme.inputBorder);
+    root.style.setProperty('--button-bg', theme.buttonBg);
+    root.style.setProperty('--tag-filter-bg', theme.tagFilterBg);
+    root.style.setProperty('--tag-filter-active-bg', theme.tagFilterActiveBg);
+    root.style.setProperty('--tag-filter-active-color', theme.tagFilterActiveColor);
+    root.style.setProperty('--reply-bg', theme.replyBg);
+    root.style.setProperty('--divider-color', theme.dividerColor);
+
+    document.body.setAttribute('data-theme', themeKey);
+
+    currentTheme = themeKey;
+    saveTheme();
+}
+
+function renderThemeSelector() {
+    const container = document.getElementById('themeSelector');
+    if (!container) return;
+
+    const html = Object.values(THEMES).map(theme => `
+        <button class="theme-option ${currentTheme === theme.key ? 'active' : ''}" data-theme="${theme.key}" title="${theme.label}">
+            <span class="theme-icon">${theme.icon}</span>
+            <span class="theme-label">${theme.label}</span>
+            <div class="theme-preview" style="background: ${theme.bgGradient}"></div>
+        </button>
+    `).join('');
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.theme-option').forEach(btn => {
+        btn.addEventListener('click', handleThemeChange);
+    });
+}
+
+function handleThemeChange(e) {
+    const themeKey = e.currentTarget.dataset.theme;
+    if (themeKey === currentTheme) return;
+
+    applyTheme(themeKey);
+    renderThemeSelector();
+}
+
+function toggleSettingsPanel() {
+    const panel = document.getElementById('settingsPanel');
+    if (!panel) return;
+
+    if (panel.classList.contains('open')) {
+        panel.classList.remove('open');
+    } else {
+        panel.classList.add('open');
+    }
+}
+
+function closeSettingsPanel() {
+    const panel = document.getElementById('settingsPanel');
+    if (panel) {
+        panel.classList.remove('open');
     }
 }
 
@@ -2318,6 +2527,8 @@ function initDrift() {
 }
 
 function init() {
+    loadTheme();
+    applyTheme(currentTheme);
     loadMessages();
     loadResonated();
     loadReplyResonated();
@@ -2331,6 +2542,7 @@ function init() {
     renderPostMoodSelector();
     renderMoodFilter();
     renderMessages();
+    renderThemeSelector();
     scheduleDailyRefresh();
 
     initDrift();
@@ -2368,6 +2580,21 @@ function init() {
             checkAndRefreshDailyTopic();
         }
     });
+
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', toggleSettingsPanel);
+    }
+
+    const settingsCloseBtn = document.getElementById('settingsCloseBtn');
+    if (settingsCloseBtn) {
+        settingsCloseBtn.addEventListener('click', closeSettingsPanel);
+    }
+
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    if (settingsOverlay) {
+        settingsOverlay.addEventListener('click', closeSettingsPanel);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);

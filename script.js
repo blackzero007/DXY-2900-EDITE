@@ -249,14 +249,6 @@ function renderDailyTopic() {
             写点什么
         </button>
     `;
-
-    container.style.cursor = 'pointer';
-    container.addEventListener('click', (e) => {
-        if (e.target.closest('.daily-topic-btn')) return;
-        handleUseTopic();
-    });
-
-    document.getElementById('useTopicBtn').addEventListener('click', handleUseTopic);
 }
 
 function refreshDailyTopicWithAnimation() {
@@ -667,6 +659,11 @@ function init() {
     document.querySelectorAll('.sort-tab').forEach(tab => {
         tab.addEventListener('click', handleSortChange);
     });
+
+    const dailyTopicCard = document.getElementById('dailyTopicCard');
+    if (dailyTopicCard) {
+        dailyTopicCard.addEventListener('click', handleUseTopic);
+    }
 
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {

@@ -42,12 +42,22 @@ const avatarColors = [
     'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)'
 ];
 
+const TAGS = [
+    { key: 'life', label: '生活', color: '#4facfe' },
+    { key: 'emotion', label: '情感', color: '#f5576c' },
+    { key: 'work', label: '工作', color: '#43e97b' },
+    { key: 'dream', label: '梦想', color: '#fee140' },
+    { key: 'treehole', label: '树洞', color: '#a8edea' }
+];
+
 const STORAGE_KEY = 'tree_hole_messages';
 const RESONATED_KEY = 'tree_hole_resonated';
 
 let messages = [];
 let resonatedIds = new Set();
 let currentSort = 'hot';
+let currentTag = 'all';
+let selectedPostTag = 'life';
 let currentIdentity = null;
 
 function randomChoice(arr) {
@@ -92,6 +102,12 @@ function loadMessages() {
         messages = [];
     }
 
+    messages.forEach(msg => {
+        if (!msg.tag) {
+            msg.tag = 'treehole';
+        }
+    });
+
     if (messages.length === 0) {
         messages = getSampleMessages();
         saveMessages();
@@ -135,7 +151,8 @@ function getSampleMessages() {
             emoji: '🐱',
             color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
             timestamp: now - 1000 * 60 * 30,
-            resonates: 42
+            resonates: 42,
+            tag: 'life'
         },
         {
             id: generateId(),
@@ -144,7 +161,8 @@ function getSampleMessages() {
             emoji: '🐰',
             color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
             timestamp: now - 1000 * 60 * 60 * 2,
-            resonates: 128
+            resonates: 128,
+            tag: 'emotion'
         },
         {
             id: generateId(),
@@ -153,7 +171,8 @@ function getSampleMessages() {
             emoji: '🌙',
             color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
             timestamp: now - 1000 * 60 * 60 * 5,
-            resonates: 89
+            resonates: 89,
+            tag: 'work'
         },
         {
             id: generateId(),
@@ -162,7 +181,8 @@ function getSampleMessages() {
             emoji: '🐧',
             color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
             timestamp: now - 1000 * 60 * 60 * 12,
-            resonates: 256
+            resonates: 256,
+            tag: 'treehole'
         },
         {
             id: generateId(),
@@ -171,7 +191,8 @@ function getSampleMessages() {
             emoji: '🦊',
             color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
             timestamp: now - 1000 * 60 * 60 * 24,
-            resonates: 312
+            resonates: 312,
+            tag: 'dream'
         },
         {
             id: generateId(),
@@ -180,13 +201,27 @@ function getSampleMessages() {
             emoji: '🐋',
             color: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
             timestamp: now - 1000 * 60 * 60 * 36,
-            resonates: 198
+            resonates: 198,
+            tag: 'emotion'
         }
     ];
 }
 
+function getTagByKey(key) {
+    return TAGS.find(t => t.key === key);
+}
+
+function getFilteredMessages() {
+    let filtered = [...messages];
+    if (currentTag !== 'all') {
+        filtered = filtered.filter(m => m.tag === currentTag);
+    }
+    return filtered;
+}
+
 function getSortedMessages() {
-    const sorted = [...messages];
+    const filtered = getFilteredMessages();
+    const sorted = [...filtered];
     if (currentSort === 'hot') {
         sorted.sort((a, b) => b.resonates - a.resonates || b.timestamp - a.timestamp);
     } else {
@@ -199,13 +234,13 @@ function renderMessages() {
     const container = document.getElementById('messagesList');
     const sorted = getSortedMessages();
 
-    document.getElementById('messageCount').textContent = messages.length;
+    document.getElementById('messageCount').textContent = getFilteredMessages().length;
 
     if (sorted.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🌳</div>
-                <p class="empty-state-text">树洞还是空的<br>来说点什么吧~</p>
+                <p class="empty-state-text">${currentTag === 'all' ? '树洞还是空的<br>来说点什么吧~' : '这个标签下还没有留言~'}</p>
             </div>
         `;
         return;
@@ -213,6 +248,9 @@ function renderMessages() {
 
     container.innerHTML = sorted.map(msg => {
         const hasResonated = resonatedIds.has(msg.id);
+        const tag = getTagByKey(msg.tag);
+        const tagColor = tag ? tag.color : '#ccc';
+        const tagLabel = tag ? tag.label : '';
         return `
             <div class="message-card" data-id="${msg.id}">
                 <div class="message-header">
@@ -223,6 +261,9 @@ function renderMessages() {
                         <div class="message-nickname">${msg.nickname}</div>
                         <div class="message-time">${formatTime(msg.timestamp)}</div>
                     </div>
+                    <span class="message-tag" style="background-color: ${tagColor}20; color: ${tagColor}">
+                        ${tagLabel}
+                    </span>
                 </div>
                 <div class="message-content">${escapeHtml(msg.content)}</div>
                 <div class="message-footer">
@@ -265,6 +306,7 @@ function handleResonate(e) {
     saveMessages();
     saveResonated();
     renderMessages();
+    renderTagFilters();
 }
 
 function refreshIdentity() {
@@ -294,7 +336,8 @@ function handleSubmit() {
         emoji: currentIdentity.emoji,
         color: currentIdentity.color,
         timestamp: Date.now(),
-        resonates: 0
+        resonates: 0,
+        tag: selectedPostTag
     };
 
     messages.unshift(newMessage);
@@ -305,13 +348,10 @@ function handleSubmit() {
 
     refreshIdentity();
 
-    if (currentSort === 'new') {
-        renderMessages();
-    } else {
-        currentSort = 'new';
-        updateSortTabs();
-        renderMessages();
-    }
+    currentTag = 'all';
+    renderTagFilters();
+    updateSortTabs();
+    renderMessages();
 
     const firstCard = document.querySelector('.message-card');
     if (firstCard) {
@@ -327,6 +367,89 @@ function updateSortTabs() {
             tab.classList.remove('active');
         }
     });
+}
+
+function renderTagFilters() {
+    const container = document.getElementById('tagFilters');
+    const allCount = messages.length;
+
+    let html = `
+        <button class="tag-filter ${currentTag === 'all' ? 'active' : ''}" data-tag="all">
+            全部
+            <span class="tag-count">${allCount}</span>
+        </button>
+    `;
+
+    TAGS.forEach(tag => {
+        const count = messages.filter(m => m.tag === tag.key).length;
+        html += `
+            <button class="tag-filter ${currentTag === tag.key ? 'active' : ''}" data-tag="${tag.key}" style="--tag-color: ${tag.color}">
+                <span class="tag-dot"></span>
+                ${tag.label}
+                <span class="tag-count">${count}</span>
+            </button>
+        `;
+    });
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.tag-filter').forEach(btn => {
+        btn.addEventListener('click', handleTagFilterChange);
+    });
+}
+
+function updateTagFilters() {
+    document.querySelectorAll('.tag-filter').forEach(btn => {
+        if (btn.dataset.tag === currentTag) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function handleTagFilterChange(e) {
+    const tag = e.currentTarget.dataset.tag;
+    if (tag === currentTag) return;
+
+    currentTag = tag;
+    updateTagFilters();
+    renderMessages();
+}
+
+function renderPostTagSelector() {
+    const container = document.getElementById('postTagSelector');
+
+    const html = TAGS.map(tag => `
+        <button class="post-tag ${selectedPostTag === tag.key ? 'active' : ''}" data-tag="${tag.key}" style="--tag-color: ${tag.color}">
+            <span class="post-tag-dot"></span>
+            ${tag.label}
+        </button>
+    `).join('');
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.post-tag').forEach(btn => {
+        btn.addEventListener('click', handlePostTagSelect);
+    });
+}
+
+function updatePostTagSelector() {
+    document.querySelectorAll('.post-tag').forEach(btn => {
+        if (btn.dataset.tag === selectedPostTag) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function handlePostTagSelect(e) {
+    const tag = e.currentTarget.dataset.tag;
+    if (tag === selectedPostTag) return;
+
+    selectedPostTag = tag;
+    updatePostTagSelector();
 }
 
 function handleSortChange(e) {
@@ -347,6 +470,8 @@ function init() {
     loadMessages();
     loadResonated();
     refreshIdentity();
+    renderTagFilters();
+    renderPostTagSelector();
     renderMessages();
 
     document.getElementById('submitBtn').addEventListener('click', handleSubmit);

@@ -137,6 +137,51 @@ body {
     color: #bbb;
 }
 
+.post-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.post-tag {
+    background: #f5f5f5;
+    border: 2px solid transparent;
+    color: #888;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.post-tag:hover {
+    background: #f0f0f0;
+}
+
+.post-tag.active {
+    background-color: color-mix(in srgb, var(--tag-color, #667eea) 15%, white);
+    border-color: var(--tag-color, #667eea);
+    color: var(--tag-color, #667eea);
+}
+
+.post-tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--tag-color, #ccc);
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.post-tag.active .post-tag-dot {
+    transform: scale(1.2);
+}
+
 .post-footer {
     display: flex;
     justify-content: space-between;
@@ -171,6 +216,71 @@ body {
 
 .submit-btn:active {
     transform: translateY(0);
+}
+
+.tag-filter-section {
+    margin-bottom: 16px;
+}
+
+.tag-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 8px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.tag-filter {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.tag-filter:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tag-filter.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tag-filter.active .tag-dot {
+    transform: scale(1.2);
+}
+
+.tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--tag-color, #ccc);
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.tag-count {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tag-filter.active .tag-count {
+    background: rgba(102, 126, 234, 0.15);
+    color: #667eea;
 }
 
 .filter-section {
@@ -286,6 +396,14 @@ body {
     color: #aaa;
 }
 
+.message-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
 .message-content {
     font-size: 15px;
     line-height: 1.7;
@@ -389,5 +507,20 @@ body {
     .sort-tab {
         padding: 6px 14px;
         font-size: 12px;
+    }
+
+    .tag-filter {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+
+    .post-tag {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+
+    .tag-filters {
+        padding: 6px;
+        gap: 6px;
     }
 }

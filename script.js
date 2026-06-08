@@ -50,6 +50,15 @@ const TAGS = [
     { key: 'treehole', label: '树洞', color: '#a8edea' }
 ];
 
+const MOODS = [
+    { key: 'happy', label: '开心', emoji: '😊', color: '#FFB800' },
+    { key: 'sad', label: '难过', emoji: '😢', color: '#5B8DEF' },
+    { key: 'anxious', label: '焦虑', emoji: '😰', color: '#FF6B6B' },
+    { key: 'expectant', label: '期待', emoji: '🤩', color: '#9B59B6' },
+    { key: 'calm', label: '平静', emoji: '😌', color: '#2ECC71' },
+    { key: 'grateful', label: '感恩', emoji: '🥰', color: '#E74C3C' }
+];
+
 const DAILY_TOPIC_KEY = 'tree_hole_daily_topic';
 
 const TOPIC_POOL = [
@@ -96,7 +105,9 @@ let replyResonatedIds = new Set();
 let expandedReplyIds = new Set();
 let currentSort = 'hot';
 let currentTag = 'all';
+let currentMood = 'all';
 let selectedPostTag = 'life';
+let selectedPostMood = 'happy';
 let currentIdentity = null;
 let dailyTopic = '';
 let replyingToMessageId = null;
@@ -150,6 +161,9 @@ function loadMessages() {
         }
         if (!msg.replies) {
             msg.replies = [];
+        }
+        if (!msg.mood) {
+            msg.mood = 'calm';
         }
     });
 
@@ -373,6 +387,7 @@ function getSampleMessages() {
             timestamp: now - 1000 * 60 * 30,
             resonates: 42,
             tag: 'life',
+            mood: 'grateful',
             replies: [
                 {
                     id: generateId(),
@@ -403,6 +418,7 @@ function getSampleMessages() {
             timestamp: now - 1000 * 60 * 60 * 2,
             resonates: 128,
             tag: 'emotion',
+            mood: 'calm',
             replies: [
                 {
                     id: generateId(),
@@ -442,6 +458,7 @@ function getSampleMessages() {
             timestamp: now - 1000 * 60 * 60 * 5,
             resonates: 89,
             tag: 'work',
+            mood: 'calm',
             replies: []
         },
         {
@@ -453,6 +470,7 @@ function getSampleMessages() {
             timestamp: now - 1000 * 60 * 60 * 12,
             resonates: 256,
             tag: 'treehole',
+            mood: 'expectant',
             replies: [
                 {
                     id: generateId(),
@@ -474,6 +492,7 @@ function getSampleMessages() {
             timestamp: now - 1000 * 60 * 60 * 24,
             resonates: 312,
             tag: 'dream',
+            mood: 'happy',
             replies: []
         },
         {
@@ -485,6 +504,7 @@ function getSampleMessages() {
             timestamp: now - 1000 * 60 * 60 * 36,
             resonates: 198,
             tag: 'emotion',
+            mood: 'sad',
             replies: [
                 {
                     id: generateId(),
@@ -513,10 +533,17 @@ function getTagByKey(key) {
     return TAGS.find(t => t.key === key);
 }
 
+function getMoodByKey(key) {
+    return MOODS.find(m => m.key === key);
+}
+
 function getFilteredMessages() {
     let filtered = [...messages];
     if (currentTag !== 'all') {
         filtered = filtered.filter(m => m.tag === currentTag);
+    }
+    if (currentMood !== 'all') {
+        filtered = filtered.filter(m => m.mood === currentMood);
     }
     return filtered;
 }
@@ -553,6 +580,10 @@ function renderMessages() {
         const tag = getTagByKey(msg.tag);
         const tagColor = tag ? tag.color : '#ccc';
         const tagLabel = tag ? tag.label : '';
+        const mood = getMoodByKey(msg.mood);
+        const moodColor = mood ? mood.color : '#FFB800';
+        const moodLabel = mood ? mood.label : '';
+        const moodEmoji = mood ? mood.emoji : '😊';
         const replies = msg.replies || [];
         const replyCount = replies.length;
         const isExpanded = expandedReplyIds.has(msg.id);
@@ -619,6 +650,10 @@ function renderMessages() {
                         <div class="message-nickname">${msg.nickname}</div>
                         <div class="message-time">${formatTime(msg.timestamp)}</div>
                     </div>
+                    <span class="message-mood" style="--mood-color: ${moodColor}">
+                        <span class="message-mood-emoji">${moodEmoji}</span>
+                        ${moodLabel}
+                    </span>
                     <span class="message-tag" style="background-color: ${tagColor}20; color: ${tagColor}">
                         ${tagLabel}
                     </span>
@@ -718,6 +753,7 @@ function handleResonate(e) {
     saveResonated();
     renderMessages();
     renderTagFilters();
+    renderMoodFilter();
 }
 
 function handleReplyToggle(e) {
@@ -844,6 +880,7 @@ function submitReply(msgId) {
 
     renderMessages();
     renderTagFilters();
+    renderMoodFilter();
 
     const repliesSection = document.querySelector(`.message-card[data-id="${msgId}"] .replies-section`);
     if (repliesSection) {
@@ -899,7 +936,8 @@ function handleSubmit() {
         color: currentIdentity.color,
         timestamp: Date.now(),
         resonates: 0,
-        tag: selectedPostTag
+        tag: selectedPostTag,
+        mood: selectedPostMood
     };
 
     messages.unshift(newMessage);
@@ -912,7 +950,9 @@ function handleSubmit() {
 
     currentTag = 'all';
     currentSort = 'new';
+    currentMood = 'all';
     renderTagFilters();
+    renderMoodFilter();
     updateSortTabs();
     renderMessages();
 
@@ -1015,6 +1055,67 @@ function handlePostTagSelect(e) {
     updatePostTagSelector();
 }
 
+function renderPostMoodSelector() {
+    const container = document.getElementById('postMoodSelector');
+
+    const html = MOODS.map(mood => `
+        <button class="post-mood ${selectedPostMood === mood.key ? 'active' : ''}" data-mood="${mood.key}" style="--mood-color: ${mood.color}">
+            <span class="post-mood-emoji">${mood.emoji}</span>
+            ${mood.label}
+        </button>
+    `).join('');
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.post-mood').forEach(btn => {
+        btn.addEventListener('click', handlePostMoodSelect);
+    });
+}
+
+function updatePostMoodSelector() {
+    document.querySelectorAll('.post-mood').forEach(btn => {
+        if (btn.dataset.mood === selectedPostMood) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function handlePostMoodSelect(e) {
+    const mood = e.currentTarget.dataset.mood;
+    if (mood === selectedPostMood) return;
+
+    selectedPostMood = mood;
+    updatePostMoodSelector();
+}
+
+function renderMoodFilter() {
+    const select = document.getElementById('moodFilter');
+    if (!select) return;
+
+    let html = '<option value="all">全部心情</option>';
+
+    MOODS.forEach(mood => {
+        const count = messages.filter(m => m.mood === mood.key).length;
+        html += `
+            <option value="${mood.key}" ${currentMood === mood.key ? 'selected' : ''}>
+                ${mood.emoji} ${mood.label} (${count})
+            </option>
+        `;
+    });
+
+    select.innerHTML = html;
+}
+
+function handleMoodFilterChange(e) {
+    const mood = e.target.value;
+    if (mood === currentMood) return;
+
+    currentMood = mood;
+    renderMessages();
+}
+
 function handleSortChange(e) {
     const sort = e.currentTarget.dataset.sort;
     if (sort === currentSort) return;
@@ -1039,12 +1140,15 @@ function init() {
     renderDailyTopic();
     renderTagFilters();
     renderPostTagSelector();
+    renderPostMoodSelector();
+    renderMoodFilter();
     renderMessages();
     scheduleDailyRefresh();
 
     document.getElementById('submitBtn').addEventListener('click', handleSubmit);
     document.getElementById('refreshNickname').addEventListener('click', refreshIdentity);
     document.getElementById('postInput').addEventListener('input', handleInput);
+    document.getElementById('moodFilter').addEventListener('change', handleMoodFilterChange);
 
     document.getElementById('postInput').addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {

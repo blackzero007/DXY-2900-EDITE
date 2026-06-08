@@ -35,6 +35,10 @@
                     </div>
                 </div>
                 <div class="post-tags" id="postTagSelector"></div>
+                <div class="post-mood-section">
+                    <div class="post-mood-label">今天的心情：</div>
+                    <div class="post-moods" id="postMoodSelector"></div>
+                </div>
                 <textarea 
                     class="post-input" 
                     id="postInput" 
@@ -73,6 +77,11 @@
                     </svg>
                     最新
                 </button>
+            </div>
+            <div class="mood-filter-wrap">
+                <select class="mood-filter" id="moodFilter">
+                    <option value="all">全部心情</option>
+                </select>
             </div>
             <div class="message-count">共 <span id="messageCount">0</span> 条心声</div>
         </section>

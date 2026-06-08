@@ -311,8 +311,8 @@ function getCapsuleUnlockTime(option, customDate) {
     }
 
     if (option === 'custom' && customDate) {
-        const unlockDate = new Date(customDate);
-        unlockDate.setHours(0, 0, 0, 0);
+        const [year, month, day] = customDate.split('-').map(Number);
+        const unlockDate = new Date(year, month - 1, day, 0, 0, 0, 0);
         return unlockDate.getTime();
     }
 
@@ -379,6 +379,20 @@ function formatUnlockDate(timestamp) {
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${year}年${month}月${day}日`;
+}
+
+function formatDateInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function getTomorrowDate() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
 }
 
 function getCapsuleMessages() {
@@ -1398,6 +1412,11 @@ function handleSubmit() {
         return;
     }
 
+    if (isCapsule && unlockTime <= Date.now()) {
+        alert('解锁时间必须在未来，请选择一个晚于今天的日期');
+        return;
+    }
+
     const newMessage = {
         id: generateId(),
         content: content,
@@ -1599,9 +1618,8 @@ function renderCapsuleOptions() {
             dateContainer.style.display = 'flex';
             const dateInput = document.getElementById('capsuleDateInput');
             if (dateInput) {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                dateInput.min = tomorrow.toISOString().split('T')[0];
+                const tomorrow = getTomorrowDate();
+                dateInput.min = formatDateInput(tomorrow);
                 if (customCapsuleDate) {
                     dateInput.value = customCapsuleDate;
                 }
@@ -1626,7 +1644,22 @@ function handleCapsuleOptionSelect(e) {
 }
 
 function handleCapsuleDateChange(e) {
-    customCapsuleDate = e.target.value;
+    const dateValue = e.target.value;
+    if (!dateValue) {
+        customCapsuleDate = '';
+        return;
+    }
+
+    const unlockTime = getCapsuleUnlockTime('custom', dateValue);
+    const tomorrow = getTomorrowDate();
+
+    if (unlockTime < tomorrow.getTime()) {
+        alert('请选择明天或之后的日期');
+        e.target.value = customCapsuleDate || '';
+        return;
+    }
+
+    customCapsuleDate = dateValue;
 }
 
 function renderMoodFilter() {

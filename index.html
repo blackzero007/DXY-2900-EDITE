@@ -21,6 +21,10 @@
                 <span class="nav-icon">🌳</span>
                 <span>树洞</span>
             </button>
+            <button class="nav-tab" data-page="favorites">
+                <span class="nav-icon">⭐</span>
+                <span>我的收藏</span>
+            </button>
             <button class="nav-tab" data-page="drift">
                 <span class="nav-icon">🍾</span>
                 <span>漂流瓶</span>
@@ -102,6 +106,44 @@
         <section class="messages-section" id="messagesList">
         </section>
 
+        </div>
+
+        <div class="page-content hidden" id="favoritesPage">
+            <section class="favorites-header-section">
+                <div class="favorites-header-card">
+                    <div class="favorites-header-icon">⭐</div>
+                    <div class="favorites-header-content">
+                        <div class="favorites-header-title">我的收藏</div>
+                        <div class="favorites-header-desc">收藏那些打动你的树洞留言，随时回来慢慢品味</div>
+                    </div>
+                    <div class="favorites-count">
+                        <span class="favorites-count-num" id="favoritesCount">0</span>
+                        <span class="favorites-count-unit">条</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="favorites-sort-section">
+                <div class="sort-tabs">
+                    <button class="sort-tab active" data-fav-sort="new">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                        最新收藏
+                    </button>
+                    <button class="sort-tab" data-fav-sort="old">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 8 10"/>
+                    </svg>
+                        最早收藏
+                    </button>
+                </div>
+            </section>
+
+            <section class="favorites-list" id="favoritesList">
+            </section>
         </div>
 
         <div class="page-content hidden" id="driftPage">

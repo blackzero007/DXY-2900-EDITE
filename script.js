@@ -98,14 +98,17 @@ const STORAGE_KEY = 'tree_hole_messages';
 const RESONATED_KEY = 'tree_hole_resonated';
 const REPLY_RESONATED_KEY = 'tree_hole_reply_resonated';
 const EXPANDED_REPLIES_KEY = 'tree_hole_expanded_replies';
+const FAVORITES_KEY = 'tree_hole_favorites';
 
 let messages = [];
 let resonatedIds = new Set();
 let replyResonatedIds = new Set();
 let expandedReplyIds = new Set();
+let favoriteIds = new Map();
 let currentSort = 'hot';
 let currentTag = 'all';
 let currentMood = 'all';
+let currentFavSort = 'new';
 let selectedPostTag = 'life';
 let selectedPostMood = 'happy';
 let currentIdentity = null;
@@ -235,6 +238,26 @@ function saveExpandedReplies() {
         localStorage.setItem(EXPANDED_REPLIES_KEY, JSON.stringify([...expandedReplyIds]));
     } catch (e) {
         console.error('保存展开状态失败:', e);
+    }
+}
+
+function loadFavorites() {
+    try {
+        const stored = localStorage.getItem(FAVORITES_KEY);
+        if (stored) {
+            const arr = JSON.parse(stored);
+            favoriteIds = new Map(arr);
+        }
+    } catch (e) {
+        favoriteIds = new Map();
+    }
+}
+
+function saveFavorites() {
+    try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favoriteIds]));
+    } catch (e) {
+        console.error('保存收藏失败:', e);
     }
 }
 
@@ -672,6 +695,10 @@ function renderMessages() {
                 </div>
                 <div class="message-content">${escapeHtml(msg.content)}</div>
                 <div class="message-footer">
+                    <button class="favorite-btn ${favoriteIds.has(msg.id) ? 'active' : ''}" data-id="${msg.id}">
+                        <span class="star-icon">${favoriteIds.has(msg.id) ? '⭐' : '☆'}</span>
+                        <span>收藏</span>
+                    </button>
                     <button class="resonate-btn ${hasResonated ? 'active' : ''}" data-id="${msg.id}">
                         <span class="heart-icon">${hasResonated ? '❤️' : '🤍'}</span>
                         <span class="resonate-count">${msg.resonates}</span>
@@ -700,6 +727,10 @@ function renderMessages() {
             </div>
         `;
     }).join('');
+
+    container.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', handleFavorite);
+    });
 
     container.querySelectorAll('.resonate-btn').forEach(btn => {
         btn.addEventListener('click', handleResonate);
@@ -766,6 +797,24 @@ function handleResonate(e) {
     renderMessages();
     renderTagFilters();
     renderMoodFilter();
+}
+
+function handleFavorite(e) {
+    const btn = e.currentTarget;
+    const id = btn.dataset.id;
+    const msg = messages.find(m => m.id === id);
+
+    if (!msg) return;
+
+    if (favoriteIds.has(id)) {
+        favoriteIds.delete(id);
+    } else {
+        favoriteIds.set(id, Date.now());
+    }
+
+    saveFavorites();
+    renderMessages();
+    renderFavoritesPage();
 }
 
 function handleReplyToggle(e) {
@@ -1137,6 +1186,226 @@ function handleSortChange(e) {
     renderMessages();
 }
 
+function getFavoriteMessages() {
+    const favMsgs = [];
+    favoriteIds.forEach((favTime, msgId) => {
+        const msg = messages.find(m => m.id === msgId);
+        if (msg) {
+            favMsgs.push({ ...msg, favoriteTime: favTime });
+        }
+    });
+    return favMsgs;
+}
+
+function renderFavoritesPage() {
+    const container = document.getElementById('favoritesList');
+    const countEl = document.getElementById('favoritesCount');
+    if (!container) return;
+
+    const favMsgs = getFavoriteMessages();
+    if (countEl) {
+        countEl.textContent = favMsgs.length;
+    }
+
+    if (favMsgs.length === 0) {
+        container.innerHTML = `
+            <div class="favorites-empty">
+                <div class="favorites-empty-icon">⭐</div>
+                <div class="favorites-empty-title">还没有收藏的留言</div>
+                <div class="favorites-empty-desc">去树洞里逛逛，收藏那些打动你的心声吧~</div>
+            </div>
+        `;
+        return;
+    }
+
+    const sorted = [...favMsgs];
+    if (currentFavSort === 'new') {
+        sorted.sort((a, b) => b.favoriteTime - a.favoriteTime);
+    } else {
+        sorted.sort((a, b) => a.favoriteTime - b.favoriteTime);
+    }
+
+    container.innerHTML = sorted.map(msg => {
+        const hasResonated = resonatedIds.has(msg.id);
+        const tag = getTagByKey(msg.tag);
+        const tagColor = tag ? tag.color : '#ccc';
+        const tagLabel = tag ? tag.label : '';
+        const mood = getMoodByKey(msg.mood);
+        const moodColor = mood ? mood.color : '#FFB800';
+        const moodLabel = mood ? mood.label : '';
+        const moodEmoji = mood ? mood.emoji : '😊';
+        const replies = msg.replies || [];
+        const replyCount = replies.length;
+        const isExpanded = expandedReplyIds.has(msg.id);
+        const isReplying = replyingToMessageId === msg.id;
+        const replyIdent = replyIdentity || currentIdentity;
+
+        const repliesHtml = replies.map(reply => {
+            const replyHasResonated = replyResonatedIds.has(reply.id);
+            return `
+                <div class="reply-item" data-reply-id="${reply.id}">
+                    <div class="reply-avatar" style="background: ${reply.color}">
+                        ${reply.emoji}
+                    </div>
+                    <div class="reply-body">
+                        <div class="reply-header">
+                            <span class="reply-nickname">${reply.nickname}</span>
+                            <span class="reply-time">${formatTime(reply.timestamp)}</span>
+                        </div>
+                        <div class="reply-content">${escapeHtml(reply.content)}</div>
+                        <div class="reply-footer">
+                            <button class="reply-resonate-btn ${replyHasResonated ? 'active' : ''}" data-message-id="${msg.id}" data-reply-id="${reply.id}">
+                                <span class="reply-heart-icon">${replyHasResonated ? '❤️' : '🤍'}</span>
+                                <span class="reply-resonate-count">${reply.resonates}</span>
+                                <span>共鸣</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const replyFormHtml = isReplying ? `
+            <div class="reply-form">
+                <div class="reply-form-header">
+                    <div class="reply-avatar-small" style="background: ${replyIdent.color}">
+                        ${replyIdent.emoji}
+                    </div>
+                    <span class="reply-form-nickname">${replyIdent.nickname}</span>
+                    <button class="reply-refresh-btn" data-message-id="${msg.id}" title="换一个昵称">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6M1 20v-6h6"/>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                    </button>
+                </div>
+                <textarea class="reply-input" data-message-id="${msg.id}" placeholder="写下你的回复..." maxlength="300"></textarea>
+                <div class="reply-form-footer">
+                    <span class="reply-char-count"><span class="reply-char-count-num">0</span>/300</span>
+                    <div class="reply-form-buttons">
+                        <button class="reply-cancel-btn" data-message-id="${msg.id}">取消</button>
+                        <button class="reply-submit-btn" data-message-id="${msg.id}">发送</button>
+                    </div>
+                </div>
+            </div>
+        ` : '';
+
+        return `
+            <div class="message-card favorite-card" data-id="${msg.id}">
+                <div class="message-header">
+                    <div class="message-avatar" style="background: ${msg.color}">
+                        ${msg.emoji}
+                    </div>
+                    <div class="message-info">
+                        <div class="message-nickname">${msg.nickname}</div>
+                        <div class="message-time">${formatTime(msg.timestamp)}</div>
+                    </div>
+                    <span class="message-mood" style="--mood-color: ${moodColor}">
+                        <span class="message-mood-emoji">${moodEmoji}</span>
+                        ${moodLabel}
+                    </span>
+                    <span class="message-tag" style="background-color: ${tagColor}20; color: ${tagColor}">
+                        ${tagLabel}
+                    </span>
+                </div>
+                <div class="message-content">${escapeHtml(msg.content)}</div>
+                <div class="favorite-time">收藏于 ${formatTime(msg.favoriteTime)}</div>
+                <div class="message-footer">
+                    <button class="favorite-btn active" data-id="${msg.id}">
+                        <span class="star-icon">⭐</span>
+                        <span>已收藏</span>
+                    </button>
+                    <button class="resonate-btn ${hasResonated ? 'active' : ''}" data-id="${msg.id}">
+                        <span class="heart-icon">${hasResonated ? '❤️' : '🤍'}</span>
+                        <span class="resonate-count">${msg.resonates}</span>
+                        <span>共鸣</span>
+                    </button>
+                    <button class="reply-toggle-btn" data-id="${msg.id}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>回复</span>
+                        <span class="reply-count">${replyCount > 0 ? replyCount : ''}</span>
+                    </button>
+                </div>
+                <div class="replies-section ${isExpanded ? 'expanded' : ''}">
+                    <button class="replies-toggle" data-id="${msg.id}">
+                        <svg class="replies-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                        <span>${isExpanded ? '收起回复' : `查看${replyCount}条回复`}</span>
+                    </button>
+                    <div class="replies-list ${isExpanded ? 'visible' : ''}">
+                        ${repliesHtml}
+                        ${replyFormHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.querySelectorAll('.favorite-btn').forEach(btn => {
+        btn.addEventListener('click', handleFavorite);
+    });
+
+    container.querySelectorAll('.resonate-btn').forEach(btn => {
+        btn.addEventListener('click', handleResonate);
+    });
+
+    container.querySelectorAll('.reply-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyToggle);
+    });
+
+    container.querySelectorAll('.replies-toggle').forEach(btn => {
+        btn.addEventListener('click', handleRepliesExpandToggle);
+    });
+
+    container.querySelectorAll('.reply-resonate-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyResonate);
+    });
+
+    container.querySelectorAll('.reply-submit-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplySubmit);
+    });
+
+    container.querySelectorAll('.reply-cancel-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyCancel);
+    });
+
+    container.querySelectorAll('.reply-refresh-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyRefreshIdentity);
+    });
+
+    container.querySelectorAll('.reply-input').forEach(input => {
+        input.addEventListener('input', handleReplyInput);
+        input.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const msgId = input.dataset.messageId;
+                submitReply(msgId);
+            }
+        });
+    });
+}
+
+function handleFavSortChange(e) {
+    const sort = e.currentTarget.dataset.favSort;
+    if (sort === currentFavSort) return;
+
+    currentFavSort = sort;
+    updateFavSortTabs();
+    renderFavoritesPage();
+}
+
+function updateFavSortTabs() {
+    document.querySelectorAll('.favorites-sort-section .sort-tab').forEach(tab => {
+        if (tab.dataset.favSort === currentFavSort) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+}
+
 function handleInput() {
     const input = document.getElementById('postInput');
     document.getElementById('charCount').textContent = input.value.length;
@@ -1395,6 +1664,10 @@ function switchPage(page) {
         renderDriftStats();
         renderMyDriftBottles();
         renderPickedDriftBottles();
+    }
+
+    if (page === 'favorites') {
+        renderFavoritesPage();
     }
 }
 
@@ -1926,6 +2199,7 @@ function init() {
     loadResonated();
     loadReplyResonated();
     loadExpandedReplies();
+    loadFavorites();
     loadDailyTopic();
     refreshIdentity();
     renderDailyTopic();
@@ -1949,8 +2223,12 @@ function init() {
         }
     });
 
-    document.querySelectorAll('.sort-tab').forEach(tab => {
+    document.querySelectorAll('#treeholePage .sort-tab').forEach(tab => {
         tab.addEventListener('click', handleSortChange);
+    });
+
+    document.querySelectorAll('.favorites-sort-section .sort-tab').forEach(tab => {
+        tab.addEventListener('click', handleFavSortChange);
     });
 
     const dailyTopicCard = document.getElementById('dailyTopicCard');

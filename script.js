@@ -196,8 +196,28 @@ function loadDailyTopic() {
         console.error('加载每日话题失败:', e);
     }
 
-    dailyTopic = randomChoice(TOPIC_POOL);
+    dailyTopic = getRandomDifferentTopic();
     saveDailyTopic();
+}
+
+function getRandomDifferentTopic() {
+    let newTopic = randomChoice(TOPIC_POOL);
+    try {
+        const stored = localStorage.getItem(DAILY_TOPIC_KEY);
+        if (stored) {
+            const data = JSON.parse(stored);
+            if (data.topic) {
+                let attempts = 0;
+                while (newTopic === data.topic && attempts < 10) {
+                    newTopic = randomChoice(TOPIC_POOL);
+                    attempts++;
+                }
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
+    return newTopic;
 }
 
 function saveDailyTopic() {
@@ -230,7 +250,29 @@ function renderDailyTopic() {
         </button>
     `;
 
+    container.style.cursor = 'pointer';
+    container.addEventListener('click', (e) => {
+        if (e.target.closest('.daily-topic-btn')) return;
+        handleUseTopic();
+    });
+
     document.getElementById('useTopicBtn').addEventListener('click', handleUseTopic);
+}
+
+function refreshDailyTopicWithAnimation() {
+    const container = document.getElementById('dailyTopicCard');
+    if (!container) return;
+
+    container.style.opacity = '0';
+    container.style.transform = 'translateY(-10px)';
+
+    setTimeout(() => {
+        dailyTopic = getRandomDifferentTopic();
+        saveDailyTopic();
+        renderDailyTopic();
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+    }, 300);
 }
 
 function handleUseTopic() {
@@ -238,10 +280,11 @@ function handleUseTopic() {
     input.value = dailyTopic + ' ';
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
+    handleInput();
 
-    const firstCard = document.querySelector('.post-card');
-    if (firstCard) {
-        firstCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const postCard = document.querySelector('.post-card');
+    if (postCard) {
+        postCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
@@ -255,11 +298,23 @@ function getTimeUntilMidnight() {
 function scheduleDailyRefresh() {
     const delay = getTimeUntilMidnight();
     setTimeout(() => {
-        dailyTopic = randomChoice(TOPIC_POOL);
-        saveDailyTopic();
-        renderDailyTopic();
+        refreshDailyTopicWithAnimation();
         scheduleDailyRefresh();
     }, delay);
+}
+
+function checkAndRefreshDailyTopic() {
+    try {
+        const stored = localStorage.getItem(DAILY_TOPIC_KEY);
+        if (stored) {
+            const data = JSON.parse(stored);
+            if (data.date !== getTodayString()) {
+                refreshDailyTopicWithAnimation();
+            }
+        }
+    } catch (e) {
+        console.error('检查每日话题失败:', e);
+    }
 }
 
 function getSampleMessages() {
@@ -611,6 +666,12 @@ function init() {
 
     document.querySelectorAll('.sort-tab').forEach(tab => {
         tab.addEventListener('click', handleSortChange);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            checkAndRefreshDailyTopic();
+        }
     });
 }
 

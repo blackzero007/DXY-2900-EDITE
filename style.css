@@ -992,6 +992,889 @@ body {
     line-height: 1.6;
 }
 
+.main-nav {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 24px;
+}
+
+.nav-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-tab.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.nav-icon {
+    font-size: 18px;
+}
+
+.page-content {
+    animation: fadeInPage 0.4s ease-out;
+}
+
+.page-content.hidden {
+    display: none;
+}
+
+@keyframes fadeInPage {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.drift-hero-section {
+    margin-bottom: 20px;
+}
+
+.drift-hero-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.drift-hero-icon {
+    font-size: 48px;
+    flex-shrink: 0;
+    animation: float 3s ease-in-out infinite;
+}
+
+.drift-hero-content {
+    flex: 1;
+}
+
+.drift-hero-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.drift-hero-desc {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.5;
+}
+
+.drift-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.drift-action-btn {
+    background: white;
+    border: none;
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.drift-action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.drift-action-btn:active {
+    transform: translateY(-1px);
+}
+
+.throw-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.throw-btn .drift-btn-sub {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.pick-btn {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.pick-btn .drift-btn-sub {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.drift-btn-icon {
+    font-size: 32px;
+}
+
+.drift-btn-text {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.drift-btn-sub {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.drift-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.drift-stat-item {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 16px 12px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.drift-stat-icon {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.drift-stat-label {
+    font-size: 12px;
+    color: #888;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.drift-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #667eea;
+    display: inline-block;
+}
+
+.drift-stat-unit {
+    font-size: 12px;
+    color: #888;
+    margin-left: 2px;
+}
+
+.drift-current-section {
+    margin-bottom: 24px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 0 4px;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+}
+
+.section-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.drift-bottles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 20px;
+}
+
+.drift-bottle-card {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    animation: bottleFloat 0.5s ease-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.drift-bottle-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.drift-bottle-card.is-reply::before {
+    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.drift-bottle-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes bottleFloat {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.drift-bottle-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.drift-bottle-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.drift-bottle-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.drift-bottle-nickname {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 2px;
+}
+
+.drift-bottle-time {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.drift-bottle-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.drift-bottle-tag.reply-tag {
+    background: rgba(67, 233, 123, 0.15);
+    color: #2ecc71;
+}
+
+.drift-bottle-content {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #333;
+    word-break: break-word;
+    margin-bottom: 14px;
+}
+
+.drift-bottle-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.drift-bottle-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+.drift-bottle-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.drift-bottle-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.drift-bottle-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f8f9fa;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.drift-bottle-btn:hover {
+    background: #e8f0fe;
+    color: #667eea;
+}
+
+.drift-bottle-btn.reply-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.drift-bottle-btn.reply-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+.drift-bottle-btn.throw-back-btn {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.drift-bottle-btn.throw-back-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(79, 172, 254, 0.3);
+}
+
+.drift-bottle-detail {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    animation: popIn 0.4s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.drift-bottle-detail::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.drift-bottle-detail.is-reply::before {
+    background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.drift-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.drift-detail-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+}
+
+.drift-detail-info {
+    flex: 1;
+}
+
+.drift-detail-nickname {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.drift-detail-time {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.drift-detail-tag {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 14px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.drift-detail-tag.reply-tag {
+    background: rgba(67, 233, 123, 0.15);
+    color: #2ecc71;
+}
+
+.drift-detail-content {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #333;
+    word-break: break-word;
+    margin-bottom: 20px;
+}
+
+.drift-detail-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.drift-detail-btn {
+    flex: 1;
+    min-width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #f8f9fa;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.drift-detail-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.drift-detail-btn.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.drift-detail-btn.primary:hover {
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.drift-detail-btn.success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+}
+
+.drift-detail-btn.success:hover {
+    box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
+}
+
+.drift-reply-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.drift-reply-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.drift-reply-form {
+    background: #f7f8fc;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.drift-reply-form-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.drift-reply-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.drift-reply-nickname {
+    font-weight: 600;
+    font-size: 13px;
+    color: #555;
+    flex: 1;
+}
+
+.drift-reply-refresh {
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: #e8e8e8;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    transition: all 0.2s;
+}
+
+.drift-reply-refresh:hover {
+    background: #d8d8d8;
+    color: #667eea;
+    transform: rotate(180deg);
+}
+
+.drift-reply-input {
+    width: 100%;
+    min-height: 80px;
+    border: 2px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+    background: white;
+}
+
+.drift-reply-input:focus {
+    border-color: #667eea;
+}
+
+.drift-reply-input::placeholder {
+    color: #bbb;
+}
+
+.drift-reply-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.drift-reply-char-count {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.drift-reply-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.drift-reply-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+.drift-reply-submit:active {
+    transform: translateY(0);
+}
+
+.drift-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.drift-empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.drift-empty-text {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.drift-bottle-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(180deg, transparent 0%, rgba(79, 172, 254, 0.1) 100%);
+    pointer-events: none;
+}
+
+.drift-picked-meta {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.drift-picked-meta-item {
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.drift-write-modal {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    animation: popIn 0.3s ease-out;
+}
+
+.drift-write-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.drift-write-icon {
+    font-size: 24px;
+}
+
+.drift-write-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.drift-write-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.drift-write-nickname {
+    font-weight: 600;
+    font-size: 15px;
+    color: #444;
+    flex: 1;
+}
+
+.drift-write-refresh {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    transition: all 0.2s;
+}
+
+.drift-write-refresh:hover {
+    background: #e0e0e0;
+    color: #667eea;
+    transform: rotate(180deg);
+}
+
+.drift-write-input {
+    width: 100%;
+    min-height: 120px;
+    border: 2px solid #f0f0f0;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+}
+
+.drift-write-input:focus {
+    border-color: #667eea;
+}
+
+.drift-write-input::placeholder {
+    color: #bbb;
+}
+
+.drift-write-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+}
+
+.drift-write-char-count {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.drift-write-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.drift-write-cancel {
+    background: #f0f0f0;
+    color: #666;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.drift-write-cancel:hover {
+    background: #e0e0e0;
+}
+
+.drift-write-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.drift-write-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.drift-write-submit:active {
+    transform: translateY(0);
+}
+
+.drift-pick-animation {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.drift-pick-bottle {
+    font-size: 80px;
+    animation: bottleBounce 1.5s ease-in-out infinite;
+    display: inline-block;
+}
+
+@keyframes bottleBounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.drift-pick-text {
+    color: white;
+    font-size: 16px;
+    margin-top: 20px;
+    opacity: 0.9;
+}
+
+.drift-my-section,
+.drift-picked-section {
+    margin-bottom: 20px;
+}
+
 @media (max-width: 600px) {
     body {
         padding: 12px;
@@ -1007,6 +1890,176 @@ body {
     
     .logo-icon {
         font-size: 36px;
+    }
+
+    .main-nav {
+        margin-bottom: 16px;
+    }
+
+    .nav-tab {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .nav-icon {
+        font-size: 16px;
+    }
+
+    .drift-hero-card {
+        padding: 18px;
+        gap: 14px;
+    }
+
+    .drift-hero-icon {
+        font-size: 36px;
+    }
+
+    .drift-hero-title {
+        font-size: 18px;
+    }
+
+    .drift-hero-desc {
+        font-size: 12px;
+    }
+
+    .drift-action-btn {
+        padding: 16px 12px;
+    }
+
+    .drift-btn-icon {
+        font-size: 28px;
+    }
+
+    .drift-btn-text {
+        font-size: 14px;
+    }
+
+    .drift-btn-sub {
+        font-size: 11px;
+    }
+
+    .drift-stats {
+        gap: 8px;
+    }
+
+    .drift-stat-item {
+        padding: 12px 8px;
+    }
+
+    .drift-stat-icon {
+        font-size: 20px;
+    }
+
+    .drift-stat-label {
+        font-size: 11px;
+    }
+
+    .drift-stat-value {
+        font-size: 20px;
+    }
+
+    .drift-stat-unit {
+        font-size: 11px;
+    }
+
+    .drift-bottle-card {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .drift-bottle-header {
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .drift-bottle-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .drift-bottle-nickname {
+        font-size: 13px;
+    }
+
+    .drift-bottle-time {
+        font-size: 11px;
+    }
+
+    .drift-bottle-content {
+        font-size: 13px;
+    }
+
+    .drift-bottle-footer {
+        padding-top: 10px;
+    }
+
+    .drift-bottle-btn {
+        padding: 5px 12px;
+        font-size: 11px;
+    }
+
+    .drift-detail-header {
+        gap: 10px;
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+    }
+
+    .drift-detail-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
+    }
+
+    .drift-detail-nickname {
+        font-size: 15px;
+    }
+
+    .drift-detail-time {
+        font-size: 12px;
+    }
+
+    .drift-detail-content {
+        font-size: 14px;
+    }
+
+    .drift-detail-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+        min-width: 100px;
+    }
+
+    .drift-write-modal {
+        padding: 18px;
+    }
+
+    .drift-write-title {
+        font-size: 16px;
+    }
+
+    .drift-write-avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+    }
+
+    .drift-write-input {
+        min-height: 100px;
+        font-size: 14px;
+    }
+
+    .drift-write-cancel,
+    .drift-write-submit {
+        padding: 8px 18px;
+        font-size: 13px;
+    }
+
+    .section-title {
+        font-size: 14px;
+    }
+
+    .section-count {
+        font-size: 11px;
     }
 
     .daily-topic-card {

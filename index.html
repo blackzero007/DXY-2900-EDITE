@@ -16,6 +16,19 @@
             <p class="subtitle">说出你的心声，在这里，没人知道你是谁</p>
         </header>
 
+        <nav class="main-nav">
+            <button class="nav-tab active" data-page="treehole">
+                <span class="nav-icon">🌳</span>
+                <span>树洞</span>
+            </button>
+            <button class="nav-tab" data-page="drift">
+                <span class="nav-icon">🍾</span>
+                <span>漂流瓶</span>
+            </button>
+        </nav>
+
+        <div class="page-content" id="treeholePage">
+
         <section class="daily-topic-section">
             <div class="daily-topic-card" id="dailyTopicCard"></div>
         </section>
@@ -88,6 +101,75 @@
 
         <section class="messages-section" id="messagesList">
         </section>
+
+        </div>
+
+        <div class="page-content hidden" id="driftPage">
+            <section class="drift-hero-section">
+                <div class="drift-hero-card">
+                    <div class="drift-hero-icon">🍾</div>
+                    <div class="drift-hero-content">
+                        <div class="drift-hero-title">漂流瓶</div>
+                        <div class="drift-hero-desc">写下你的心愿，扔进大海，让它漂向未知的远方</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="drift-actions">
+                <button class="drift-action-btn throw-btn" id="throwBottleBtn">
+                    <span class="drift-btn-icon">✍️</span>
+                    <span class="drift-btn-text">扔一个</span>
+                    <span class="drift-btn-sub">写下你的留言</span>
+                </button>
+                <button class="drift-action-btn pick-btn" id="pickBottleBtn">
+                    <span class="drift-btn-icon">🌊</span>
+                    <span class="drift-btn-text">捞一个</span>
+                    <span class="drift-btn-sub">随机遇见ta</span>
+                </button>
+            </section>
+
+            <section class="drift-stats">
+                <div class="drift-stat-item">
+                    <span class="drift-stat-icon">📤</span>
+                    <span class="drift-stat-label">扔出</span>
+                    <span class="drift-stat-value" id="thrownCount">0</span>
+                    <span class="drift-stat-unit">个</span>
+                </div>
+                <div class="drift-stat-item">
+                    <span class="drift-stat-icon">📥</span>
+                    <span class="drift-stat-label">捞到</span>
+                    <span class="drift-stat-value" id="pickedCount">0</span>
+                    <span class="drift-stat-unit">个</span>
+                </div>
+                <div class="drift-stat-item">
+                    <span class="drift-stat-icon">💬</span>
+                    <span class="drift-stat-label">回应</span>
+                    <span class="drift-stat-value" id="replyCount">0</span>
+                    <span class="drift-stat-unit">个</span>
+                </div>
+            </section>
+
+            <section class="drift-current-section" id="driftCurrentSection" style="display: none;">
+            </section>
+
+            <section class="drift-my-section">
+                <div class="section-header">
+                    <span class="section-title">我扔出的漂流瓶</span>
+                    <span class="section-count" id="myBottleCount">0</span>
+                </div>
+                <div class="drift-bottles-list" id="myBottlesList">
+                </div>
+            </section>
+
+            <section class="drift-picked-section">
+                <div class="section-header">
+                    <span class="section-title">我捞到的漂流瓶</span>
+                    <span class="section-count" id="pickedBottleCount">0</span>
+                </div>
+                <div class="drift-bottles-list" id="pickedBottlesList">
+                </div>
+            </section>
+        </div>
 
         <footer class="footer">
             <p>💫 你的秘密，树洞守护</p>

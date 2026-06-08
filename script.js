@@ -1184,4 +1184,785 @@ function init() {
     });
 }
 
+const DRIFT_STORAGE_KEY = 'drift_bottles';
+const DRIFT_MY_BOTTLES_KEY = 'drift_my_bottles';
+const DRIFT_PICKED_KEY = 'drift_picked_bottles';
+const DRIFT_REPLIED_KEY = 'drift_replied_bottles';
+
+let driftBottles = [];
+let myDriftBottles = [];
+let pickedDriftBottles = [];
+let repliedDriftBottleIds = new Set();
+let currentPage = 'treehole';
+let currentDriftBottle = null;
+let isWritingDrift = false;
+let driftWriteIdentity = null;
+let driftReplyIdentity = null;
+let isReplyingDrift = false;
+
+function loadDriftBottles() {
+    try {
+        const stored = localStorage.getItem(DRIFT_STORAGE_KEY);
+        if (stored) {
+            driftBottles = JSON.parse(stored);
+        }
+    } catch (e) {
+        driftBottles = [];
+    }
+
+    driftBottles.forEach(bottle => {
+        if (!bottle.type) {
+            bottle.type = 'normal';
+        }
+        if (!bottle.replyTo) {
+            bottle.replyTo = null;
+        }
+        if (!bottle.replies) {
+            bottle.replies = [];
+        }
+        if (!bottle.pickCount) {
+            bottle.pickCount = 0;
+        }
+        if (!bottle.replyCount) {
+            bottle.replyCount = 0;
+        }
+    });
+
+    if (driftBottles.length === 0) {
+        driftBottles = getSampleDriftBottles();
+        saveDriftBottles();
+    }
+}
+
+function saveDriftBottles() {
+    try {
+        localStorage.setItem(DRIFT_STORAGE_KEY, JSON.stringify(driftBottles));
+    } catch (e) {
+        console.error('保存漂流瓶失败:', e);
+    }
+}
+
+function loadMyDriftBottles() {
+    try {
+        const stored = localStorage.getItem(DRIFT_MY_BOTTLES_KEY);
+        if (stored) {
+            myDriftBottles = JSON.parse(stored);
+        }
+    } catch (e) {
+        myDriftBottles = [];
+    }
+}
+
+function saveMyDriftBottles() {
+    try {
+        localStorage.setItem(DRIFT_MY_BOTTLES_KEY, JSON.stringify(myDriftBottles));
+    } catch (e) {
+        console.error('保存我的漂流瓶失败:', e);
+    }
+}
+
+function loadPickedDriftBottles() {
+    try {
+        const stored = localStorage.getItem(DRIFT_PICKED_KEY);
+        if (stored) {
+            pickedDriftBottles = JSON.parse(stored);
+        }
+    } catch (e) {
+        pickedDriftBottles = [];
+    }
+}
+
+function savePickedDriftBottles() {
+    try {
+        localStorage.setItem(DRIFT_PICKED_KEY, JSON.stringify(pickedDriftBottles));
+    } catch (e) {
+        console.error('保存捞到的漂流瓶失败:', e);
+    }
+}
+
+function loadRepliedDriftBottles() {
+    try {
+        const stored = localStorage.getItem(DRIFT_REPLIED_KEY);
+        if (stored) {
+            repliedDriftBottleIds = new Set(JSON.parse(stored));
+        }
+    } catch (e) {
+        repliedDriftBottleIds = new Set();
+    }
+}
+
+function saveRepliedDriftBottles() {
+    try {
+        localStorage.setItem(DRIFT_REPLIED_KEY, JSON.stringify([...repliedDriftBottleIds]));
+    } catch (e) {
+        console.error('保存已回应漂流瓶失败:', e);
+    }
+}
+
+function getSampleDriftBottles() {
+    const now = Date.now();
+    return [
+        {
+            id: generateId(),
+            content: '今天看到海边的日落特别美，突然想把这一刻装进瓶子里，漂给一个陌生的你。希望看到这条消息的人，今天也能遇到美好的事。',
+            nickname: '海边的贝壳',
+            emoji: '🐚',
+            color: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+            timestamp: now - 1000 * 60 * 60 * 2,
+            type: 'normal',
+            replyTo: null,
+            replies: [],
+            pickCount: 15,
+            replyCount: 3
+        },
+        {
+            id: generateId(),
+            content: '如果你捡到了这个瓶子，可以告诉我你最近在为什么而努力吗？我正在准备考研，有时候会觉得很累，但还是想坚持下去。',
+            nickname: '追梦的小蜗牛',
+            emoji: '🐌',
+            color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            timestamp: now - 1000 * 60 * 60 * 5,
+            type: 'normal',
+            replyTo: null,
+            replies: [],
+            pickCount: 28,
+            replyCount: 7
+        },
+        {
+            id: generateId(),
+            content: '深夜睡不着，翻来覆去想着那个人。明明知道不可能，可心里还是放不下。如果你也有同样的经历，就当这是一个树洞吧。',
+            nickname: '失眠的星星',
+            emoji: '⭐',
+            color: 'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)',
+            timestamp: now - 1000 * 60 * 60 * 12,
+            type: 'normal',
+            replyTo: null,
+            replies: [],
+            pickCount: 42,
+            replyCount: 12
+        },
+        {
+            id: generateId(),
+            content: '今天是我的生日，一个人在异乡。没有蛋糕，没有祝福，但我给自己买了一碗面。希望明年的生日，能有人陪我一起过。',
+            nickname: '孤独的企鹅',
+            emoji: '🐧',
+            color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            timestamp: now - 1000 * 60 * 60 * 24,
+            type: 'normal',
+            replyTo: null,
+            replies: [],
+            pickCount: 56,
+            replyCount: 20
+        },
+        {
+            id: generateId(),
+            content: '捡到瓶子的朋友，你好呀~ 我是一个喜欢画画的人，虽然画得不好，但每次拿起画笔都会觉得很开心。你有什么一直坚持在做的事情吗？',
+            nickname: '爱画画的小猫',
+            emoji: '🎨',
+            color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            timestamp: now - 1000 * 60 * 60 * 36,
+            type: 'normal',
+            replyTo: null,
+            replies: [],
+            pickCount: 33,
+            replyCount: 8
+        }
+    ];
+}
+
+function switchPage(page) {
+    if (page === currentPage) return;
+
+    currentPage = page;
+
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        if (tab.dataset.page === page) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    document.querySelectorAll('.page-content').forEach(content => {
+        if (content.id === `${page}Page`) {
+            content.classList.remove('hidden');
+        } else {
+            content.classList.add('hidden');
+        }
+    });
+
+    if (page === 'drift') {
+        renderDriftStats();
+        renderMyDriftBottles();
+        renderPickedDriftBottles();
+    }
+}
+
+function handleNavTabClick(e) {
+    const page = e.currentTarget.dataset.page;
+    switchPage(page);
+}
+
+function renderDriftStats() {
+    document.getElementById('thrownCount').textContent = myDriftBottles.length;
+    document.getElementById('pickedCount').textContent = pickedDriftBottles.length;
+    document.getElementById('replyCount').textContent = repliedDriftBottleIds.size;
+}
+
+function renderMyDriftBottles() {
+    const container = document.getElementById('myBottlesList');
+    const countEl = document.getElementById('myBottleCount');
+    countEl.textContent = myDriftBottles.length;
+
+    if (myDriftBottles.length === 0) {
+        container.innerHTML = `
+            <div class="drift-empty">
+                <div class="drift-empty-icon">🍾</div>
+                <div class="drift-empty-text">你还没有扔出过漂流瓶<br>点击上方"扔一个"开始吧~</div>
+            </div>
+        `;
+        return;
+    }
+
+    const sorted = [...myDriftBottles].sort((a, b) => b.timestamp - a.timestamp);
+    container.innerHTML = sorted.map(bottle => renderDriftBottleCard(bottle, 'my')).join('');
+
+    container.querySelectorAll('.drift-bottle-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const bottle = myDriftBottles.find(b => b.id === id);
+            if (bottle) {
+                showDriftBottleDetail(bottle, 'my');
+            }
+        });
+    });
+}
+
+function renderPickedDriftBottles() {
+    const container = document.getElementById('pickedBottlesList');
+    const countEl = document.getElementById('pickedBottleCount');
+    countEl.textContent = pickedDriftBottles.length;
+
+    if (pickedDriftBottles.length === 0) {
+        container.innerHTML = `
+            <div class="drift-empty">
+                <div class="drift-empty-icon">🌊</div>
+                <div class="drift-empty-text">你还没有捞到过漂流瓶<br>点击上方"捞一个"试试运气~</div>
+            </div>
+        `;
+        return;
+    }
+
+    const sorted = [...pickedDriftBottles].sort((a, b) => b.pickTime - a.pickTime);
+    container.innerHTML = sorted.map(bottle => renderDriftBottleCard(bottle, 'picked')).join('');
+
+    container.querySelectorAll('.drift-bottle-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const bottle = pickedDriftBottles.find(b => b.id === id);
+            if (bottle) {
+                showDriftBottleDetail(bottle, 'picked');
+            }
+        });
+    });
+}
+
+function renderDriftBottleCard(bottle, type) {
+    const isReply = bottle.type === 'reply';
+    const hasReplied = repliedDriftBottleIds.has(bottle.id);
+
+    return `
+        <div class="drift-bottle-card ${isReply ? 'is-reply' : ''}" data-id="${bottle.id}">
+            <div class="drift-bottle-header">
+                <div class="drift-bottle-avatar" style="background: ${bottle.color}">
+                    ${bottle.emoji}
+                </div>
+                <div class="drift-bottle-info">
+                    <div class="drift-bottle-nickname">${bottle.nickname}</div>
+                    <div class="drift-bottle-time">${formatTime(bottle.timestamp)}</div>
+                </div>
+                <span class="drift-bottle-tag ${isReply ? 'reply-tag' : ''}">
+                    ${isReply ? '回应' : '漂流瓶'}
+                </span>
+            </div>
+            <div class="drift-bottle-content">${escapeHtml(bottle.content.substring(0, 80))}${bottle.content.length > 80 ? '...' : ''}</div>
+            <div class="drift-bottle-footer">
+                <div class="drift-bottle-stats">
+                    <span class="drift-bottle-stat">👁️ ${bottle.pickCount}</span>
+                    <span class="drift-bottle-stat">💬 ${bottle.replyCount}</span>
+                </div>
+                <div class="drift-bottle-actions">
+                    ${type === 'picked' && !hasReplied ? `
+                        <button class="drift-bottle-btn reply-btn" data-action="reply">回应</button>
+                    ` : ''}
+                    ${type === 'picked' ? `
+                        <button class="drift-bottle-btn throw-back-btn" data-action="throwBack">扔回海里</button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function showDriftBottleDetail(bottle, source) {
+    const section = document.getElementById('driftCurrentSection');
+    const isReply = bottle.type === 'reply';
+    const hasReplied = repliedDriftBottleIds.has(bottle.id);
+    const isMy = source === 'my';
+
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    let replyFormHtml = '';
+    if (source === 'picked' && !hasReplied) {
+        if (isReplyingDrift) {
+            replyFormHtml = `
+                <div class="drift-reply-section">
+                    <div class="drift-reply-title">💬 写回应</div>
+                    <div class="drift-reply-form">
+                        <div class="drift-reply-form-header">
+                            <div class="drift-reply-avatar" style="background: ${driftReplyIdentity.color}">
+                                ${driftReplyIdentity.emoji}
+                            </div>
+                            <span class="drift-reply-nickname">${driftReplyIdentity.nickname}</span>
+                            <button class="drift-reply-refresh" id="driftReplyRefreshBtn" title="换一个昵称">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <textarea class="drift-reply-input" id="driftReplyInput" placeholder="写下你的回应，作为漂流瓶漂回去..." maxlength="300"></textarea>
+                        <div class="drift-reply-footer">
+                            <span class="drift-reply-char-count"><span id="driftReplyCharCount">0</span>/300</span>
+                            <button class="drift-reply-submit" id="driftReplySubmitBtn">发送回应</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    section.innerHTML = `
+        <div class="section-header">
+            <span class="section-title">${isMy ? '我的漂流瓶' : '捞到的漂流瓶'}</span>
+        </div>
+        <div class="drift-bottle-detail ${isReply ? 'is-reply' : ''}">
+            <div class="drift-detail-header">
+                <div class="drift-detail-avatar" style="background: ${bottle.color}">
+                    ${bottle.emoji}
+                </div>
+                <div class="drift-detail-info">
+                    <div class="drift-detail-nickname">${bottle.nickname}</div>
+                    <div class="drift-detail-time">${formatTime(bottle.timestamp)}</div>
+                </div>
+                <span class="drift-detail-tag ${isReply ? 'reply-tag' : ''}">
+                    ${isReply ? '回应瓶' : '漂流瓶'}
+                </span>
+            </div>
+            <div class="drift-detail-content">${escapeHtml(bottle.content)}</div>
+            <div class="drift-picked-meta">
+                <span class="drift-picked-meta-item">👁️ 被捞起 ${bottle.pickCount} 次</span>
+                <span class="drift-picked-meta-item">💬 收到 ${bottle.replyCount} 个回应</span>
+            </div>
+            <div class="drift-detail-actions">
+                ${source === 'picked' && !hasReplied ? `
+                    <button class="drift-detail-btn primary" id="driftReplyActionBtn">
+                        💬 回应
+                    </button>
+                ` : ''}
+                ${source === 'picked' && hasReplied ? `
+                    <button class="drift-detail-btn" disabled style="opacity: 0.6; cursor: default;">
+                        ✅ 已回应
+                    </button>
+                ` : ''}
+                ${source === 'picked' ? `
+                    <button class="drift-detail-btn" id="driftThrowBackBtn">
+                        🌊 扔回海里
+                    </button>
+                ` : ''}
+                <button class="drift-detail-btn" id="driftCloseDetailBtn">
+                    关闭
+                </button>
+            </div>
+            ${replyFormHtml}
+        </div>
+    `;
+
+    currentDriftBottle = bottle;
+
+    const replyActionBtn = document.getElementById('driftReplyActionBtn');
+    if (replyActionBtn) {
+        replyActionBtn.addEventListener('click', () => {
+            isReplyingDrift = true;
+            if (!driftReplyIdentity) {
+                driftReplyIdentity = generateIdentity();
+            }
+            showDriftBottleDetail(bottle, source);
+        });
+    }
+
+    const replyRefreshBtn = document.getElementById('driftReplyRefreshBtn');
+    if (replyRefreshBtn) {
+        replyRefreshBtn.addEventListener('click', () => {
+            driftReplyIdentity = generateIdentity();
+            showDriftBottleDetail(bottle, source);
+            setTimeout(() => {
+                const input = document.getElementById('driftReplyInput');
+                if (input) input.focus();
+            }, 50);
+        });
+    }
+
+    const replyInput = document.getElementById('driftReplyInput');
+    if (replyInput) {
+        replyInput.addEventListener('input', handleDriftReplyInput);
+        replyInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                submitDriftReply();
+            }
+        });
+        setTimeout(() => replyInput.focus(), 100);
+    }
+
+    const replySubmitBtn = document.getElementById('driftReplySubmitBtn');
+    if (replySubmitBtn) {
+        replySubmitBtn.addEventListener('click', submitDriftReply);
+    }
+
+    const throwBackBtn = document.getElementById('driftThrowBackBtn');
+    if (throwBackBtn) {
+        throwBackBtn.addEventListener('click', () => throwBackBottle(bottle));
+    }
+
+    const closeBtn = document.getElementById('driftCloseDetailBtn');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeDriftDetail);
+    }
+}
+
+function handleDriftReplyInput(e) {
+    const input = e.target;
+    const charCount = document.getElementById('driftReplyCharCount');
+    if (charCount) {
+        charCount.textContent = input.value.length;
+    }
+}
+
+function submitDriftReply() {
+    const input = document.getElementById('driftReplyInput');
+    if (!input || !currentDriftBottle) return;
+
+    const content = input.value.trim();
+    if (!content) {
+        input.focus();
+        return;
+    }
+
+    if (!driftReplyIdentity) {
+        driftReplyIdentity = generateIdentity();
+    }
+
+    const replyBottle = {
+        id: generateId(),
+        content: content,
+        nickname: driftReplyIdentity.nickname,
+        emoji: driftReplyIdentity.emoji,
+        color: driftReplyIdentity.color,
+        timestamp: Date.now(),
+        type: 'reply',
+        replyTo: currentDriftBottle.id,
+        replies: [],
+        pickCount: 0,
+        replyCount: 0
+    };
+
+    driftBottles.push(replyBottle);
+
+    const originalBottle = driftBottles.find(b => b.id === currentDriftBottle.id);
+    if (originalBottle) {
+        originalBottle.replyCount++;
+    }
+
+    const pickedOriginal = pickedDriftBottles.find(b => b.id === currentDriftBottle.id);
+    if (pickedOriginal) {
+        pickedOriginal.replyCount++;
+    }
+
+    myDriftBottles.push(replyBottle);
+
+    repliedDriftBottleIds.add(currentDriftBottle.id);
+
+    saveDriftBottles();
+    saveMyDriftBottles();
+    savePickedDriftBottles();
+    saveRepliedDriftBottles();
+
+    isReplyingDrift = false;
+    driftReplyIdentity = null;
+
+    renderDriftStats();
+    renderMyDriftBottles();
+    renderPickedDriftBottles();
+
+    const updatedBottle = pickedDriftBottles.find(b => b.id === currentDriftBottle.id);
+    if (updatedBottle) {
+        showDriftBottleDetail(updatedBottle, 'picked');
+    }
+}
+
+function throwBackBottle(bottle) {
+    pickedDriftBottles = pickedDriftBottles.filter(b => b.id !== bottle.id);
+    savePickedDriftBottles();
+
+    closeDriftDetail();
+    renderDriftStats();
+    renderPickedDriftBottles();
+}
+
+function closeDriftDetail() {
+    const section = document.getElementById('driftCurrentSection');
+    section.style.display = 'none';
+    currentDriftBottle = null;
+    isReplyingDrift = false;
+    driftReplyIdentity = null;
+}
+
+function showThrowBottleModal() {
+    const section = document.getElementById('driftCurrentSection');
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    if (!driftWriteIdentity) {
+        driftWriteIdentity = generateIdentity();
+    }
+
+    section.innerHTML = `
+        <div class="section-header">
+            <span class="section-title">扔一个漂流瓶</span>
+        </div>
+        <div class="drift-write-modal">
+            <div class="drift-write-title">
+                <span class="drift-write-icon">🍾</span>
+                写下你的留言
+            </div>
+            <div class="drift-write-header">
+                <div class="drift-write-avatar" style="background: ${driftWriteIdentity.color}">
+                    ${driftWriteIdentity.emoji}
+                </div>
+                <span class="drift-write-nickname">${driftWriteIdentity.nickname}</span>
+                <button class="drift-write-refresh" id="driftWriteRefreshBtn" title="换一个昵称">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                </button>
+            </div>
+            <textarea 
+                class="drift-write-input" 
+                id="driftWriteInput" 
+                placeholder="把你的心事、愿望、或者只是今天的心情，装进这个漂流瓶里..."
+                maxlength="300"
+            ></textarea>
+            <div class="drift-write-footer">
+                <span class="drift-write-char-count"><span id="driftWriteCharCount">0</span>/300</span>
+                <div class="drift-write-actions">
+                    <button class="drift-write-cancel" id="driftWriteCancelBtn">取消</button>
+                    <button class="drift-write-submit" id="driftWriteSubmitBtn">
+                        <span>🌊</span>
+                        扔出去
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    isWritingDrift = true;
+
+    const input = document.getElementById('driftWriteInput');
+    setTimeout(() => input.focus(), 100);
+
+    input.addEventListener('input', (e) => {
+        document.getElementById('driftWriteCharCount').textContent = e.target.value.length;
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            submitDriftBottle();
+        }
+    });
+
+    document.getElementById('driftWriteRefreshBtn').addEventListener('click', () => {
+        driftWriteIdentity = generateIdentity();
+        showThrowBottleModal();
+        setTimeout(() => {
+            const inp = document.getElementById('driftWriteInput');
+            if (inp) inp.focus();
+        }, 50);
+    });
+
+    document.getElementById('driftWriteCancelBtn').addEventListener('click', () => {
+        isWritingDrift = false;
+        closeDriftDetail();
+    });
+
+    document.getElementById('driftWriteSubmitBtn').addEventListener('click', submitDriftBottle);
+}
+
+function submitDriftBottle() {
+    const input = document.getElementById('driftWriteInput');
+    if (!input) return;
+
+    const content = input.value.trim();
+    if (!content) {
+        input.focus();
+        return;
+    }
+
+    if (!driftWriteIdentity) {
+        driftWriteIdentity = generateIdentity();
+    }
+
+    const newBottle = {
+        id: generateId(),
+        content: content,
+        nickname: driftWriteIdentity.nickname,
+        emoji: driftWriteIdentity.emoji,
+        color: driftWriteIdentity.color,
+        timestamp: Date.now(),
+        type: 'normal',
+        replyTo: null,
+        replies: [],
+        pickCount: 0,
+        replyCount: 0
+    };
+
+    driftBottles.push(newBottle);
+    myDriftBottles.push(newBottle);
+
+    saveDriftBottles();
+    saveMyDriftBottles();
+
+    driftWriteIdentity = generateIdentity();
+    isWritingDrift = false;
+
+    renderDriftStats();
+    renderMyDriftBottles();
+
+    showDriftBottleDetail(newBottle, 'my');
+
+    const section = document.getElementById('driftCurrentSection');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function pickRandomBottle() {
+    const myIds = new Set(myDriftBottles.map(b => b.id));
+    const availableBottles = driftBottles.filter(b => !myIds.has(b.id));
+
+    if (availableBottles.length === 0) {
+        alert('海里暂时没有漂流瓶了~ 先扔一个试试吧！');
+        return;
+    }
+
+    const section = document.getElementById('driftCurrentSection');
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    section.innerHTML = `
+        <div class="section-header">
+            <span class="section-title">捞漂流瓶</span>
+        </div>
+        <div class="drift-pick-animation">
+            <span class="drift-pick-bottle">🍾</span>
+            <div class="drift-pick-text">正在从海里捞取漂流瓶...</div>
+        </div>
+    `;
+
+    setTimeout(() => {
+        const randomIndex = Math.floor(Math.random() * availableBottles.length);
+        const bottle = { ...availableBottles[randomIndex] };
+
+        bottle.pickCount++;
+        bottle.pickTime = Date.now();
+
+        const globalBottle = driftBottles.find(b => b.id === bottle.id);
+        if (globalBottle) {
+            globalBottle.pickCount++;
+        }
+
+        const existingIndex = pickedDriftBottles.findIndex(b => b.id === bottle.id);
+        if (existingIndex >= 0) {
+            pickedDriftBottles[existingIndex] = bottle;
+        } else {
+            pickedDriftBottles.push(bottle);
+        }
+
+        saveDriftBottles();
+        savePickedDriftBottles();
+
+        renderDriftStats();
+        renderPickedDriftBottles();
+
+        showDriftBottleDetail(bottle, 'picked');
+    }, 1200);
+}
+
+function initDrift() {
+    loadDriftBottles();
+    loadMyDriftBottles();
+    loadPickedDriftBottles();
+    loadRepliedDriftBottles();
+
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', handleNavTabClick);
+    });
+
+    document.getElementById('throwBottleBtn').addEventListener('click', showThrowBottleModal);
+    document.getElementById('pickBottleBtn').addEventListener('click', pickRandomBottle);
+}
+
+function init() {
+    loadMessages();
+    loadResonated();
+    loadReplyResonated();
+    loadExpandedReplies();
+    loadDailyTopic();
+    refreshIdentity();
+    renderDailyTopic();
+    renderTagFilters();
+    renderPostTagSelector();
+    renderPostMoodSelector();
+    renderMoodFilter();
+    renderMessages();
+    scheduleDailyRefresh();
+
+    initDrift();
+
+    document.getElementById('submitBtn').addEventListener('click', handleSubmit);
+    document.getElementById('refreshNickname').addEventListener('click', refreshIdentity);
+    document.getElementById('postInput').addEventListener('input', handleInput);
+    document.getElementById('moodFilter').addEventListener('change', handleMoodFilterChange);
+
+    document.getElementById('postInput').addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            handleSubmit();
+        }
+    });
+
+    document.querySelectorAll('.sort-tab').forEach(tab => {
+        tab.addEventListener('click', handleSortChange);
+    });
+
+    const dailyTopicCard = document.getElementById('dailyTopicCard');
+    if (dailyTopicCard) {
+        dailyTopicCard.addEventListener('click', handleUseTopic);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            checkAndRefreshDailyTopic();
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', init);

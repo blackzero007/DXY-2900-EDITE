@@ -87,14 +87,20 @@ const TOPIC_POOL = [
 
 const STORAGE_KEY = 'tree_hole_messages';
 const RESONATED_KEY = 'tree_hole_resonated';
+const REPLY_RESONATED_KEY = 'tree_hole_reply_resonated';
+const EXPANDED_REPLIES_KEY = 'tree_hole_expanded_replies';
 
 let messages = [];
 let resonatedIds = new Set();
+let replyResonatedIds = new Set();
+let expandedReplyIds = new Set();
 let currentSort = 'hot';
 let currentTag = 'all';
 let selectedPostTag = 'life';
 let currentIdentity = null;
 let dailyTopic = '';
+let replyingToMessageId = null;
+let replyIdentity = null;
 
 function randomChoice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
@@ -142,6 +148,9 @@ function loadMessages() {
         if (!msg.tag) {
             msg.tag = 'treehole';
         }
+        if (!msg.replies) {
+            msg.replies = [];
+        }
     });
 
     if (messages.length === 0) {
@@ -174,6 +183,44 @@ function saveResonated() {
         localStorage.setItem(RESONATED_KEY, JSON.stringify([...resonatedIds]));
     } catch (e) {
         console.error('保存失败:', e);
+    }
+}
+
+function loadReplyResonated() {
+    try {
+        const stored = localStorage.getItem(REPLY_RESONATED_KEY);
+        if (stored) {
+            replyResonatedIds = new Set(JSON.parse(stored));
+        }
+    } catch (e) {
+        replyResonatedIds = new Set();
+    }
+}
+
+function saveReplyResonated() {
+    try {
+        localStorage.setItem(REPLY_RESONATED_KEY, JSON.stringify([...replyResonatedIds]));
+    } catch (e) {
+        console.error('保存回复共鸣失败:', e);
+    }
+}
+
+function loadExpandedReplies() {
+    try {
+        const stored = localStorage.getItem(EXPANDED_REPLIES_KEY);
+        if (stored) {
+            expandedReplyIds = new Set(JSON.parse(stored));
+        }
+    } catch (e) {
+        expandedReplyIds = new Set();
+    }
+}
+
+function saveExpandedReplies() {
+    try {
+        localStorage.setItem(EXPANDED_REPLIES_KEY, JSON.stringify([...expandedReplyIds]));
+    } catch (e) {
+        console.error('保存展开状态失败:', e);
     }
 }
 
@@ -311,26 +358,80 @@ function checkAndRefreshDailyTopic() {
 
 function getSampleMessages() {
     const now = Date.now();
+    const msg1Id = generateId();
+    const msg2Id = generateId();
+    const msg4Id = generateId();
+    const msg6Id = generateId();
+
     return [
         {
-            id: generateId(),
+            id: msg1Id,
             content: '今天在地铁上看到一个老爷爷给老奶奶让座，突然觉得这个世界还是很温暖的。希望每个人都能被温柔以待。',
             nickname: '橘子味的小猫',
             emoji: '🐱',
             color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
             timestamp: now - 1000 * 60 * 30,
             resonates: 42,
-            tag: 'life'
+            tag: 'life',
+            replies: [
+                {
+                    id: generateId(),
+                    content: '是啊，生活中总有一些小温暖在不经意间出现~',
+                    nickname: '温柔的云朵',
+                    emoji: '☁️',
+                    color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    timestamp: now - 1000 * 60 * 20,
+                    resonates: 8
+                },
+                {
+                    id: generateId(),
+                    content: '被你说的也想出门走走了，说不定也能遇到什么暖心的事',
+                    nickname: '快乐的蜜蜂',
+                    emoji: '🐝',
+                    color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    timestamp: now - 1000 * 60 * 15,
+                    resonates: 5
+                }
+            ]
         },
         {
-            id: generateId(),
+            id: msg2Id,
             content: '终于鼓起勇气跟暗恋了三年的人表白了，虽然被拒绝了，但心里反而轻松了很多。有些事情，做过了就不会后悔。',
             nickname: '勇敢的小兔',
             emoji: '🐰',
             color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
             timestamp: now - 1000 * 60 * 60 * 2,
             resonates: 128,
-            tag: 'emotion'
+            tag: 'emotion',
+            replies: [
+                {
+                    id: generateId(),
+                    content: '你真的很勇敢！至少不会留有遗憾了，加油！',
+                    nickname: '星星上的精灵',
+                    emoji: '🧚',
+                    color: 'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)',
+                    timestamp: now - 1000 * 60 * 90,
+                    resonates: 23
+                },
+                {
+                    id: generateId(),
+                    content: '做过就不会后悔，这才是最重要的。更好的人还在前面等着你呢~',
+                    nickname: '樱花味的小熊',
+                    emoji: '🐻',
+                    color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                    timestamp: now - 1000 * 60 * 70,
+                    resonates: 15
+                },
+                {
+                    id: generateId(),
+                    content: '三年...好长啊，佩服你的勇气。祝你遇到更好的人！',
+                    nickname: '海边的贝壳',
+                    emoji: '🐚',
+                    color: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+                    timestamp: now - 1000 * 60 * 50,
+                    resonates: 10
+                }
+            ]
         },
         {
             id: generateId(),
@@ -340,17 +441,29 @@ function getSampleMessages() {
             color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
             timestamp: now - 1000 * 60 * 60 * 5,
             resonates: 89,
-            tag: 'work'
+            tag: 'work',
+            replies: []
         },
         {
-            id: generateId(),
+            id: msg4Id,
             content: '今天是我来这座城市的第100天，还是没有交到什么朋友，但我相信一切都会好起来的。给自己加油！',
             nickname: '追梦的企鹅',
             emoji: '🐧',
             color: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
             timestamp: now - 1000 * 60 * 60 * 12,
             resonates: 256,
-            tag: 'treehole'
+            tag: 'treehole',
+            replies: [
+                {
+                    id: generateId(),
+                    content: '加油！我也是一个人在外地，虽然有时候会孤单，但也在慢慢变好。',
+                    nickname: '奋斗的小松鼠',
+                    emoji: '🐿️',
+                    color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    timestamp: now - 1000 * 60 * 60 * 10,
+                    resonates: 45
+                }
+            ]
         },
         {
             id: generateId(),
@@ -360,17 +473,38 @@ function getSampleMessages() {
             color: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
             timestamp: now - 1000 * 60 * 60 * 24,
             resonates: 312,
-            tag: 'dream'
+            tag: 'dream',
+            replies: []
         },
         {
-            id: generateId(),
+            id: msg6Id,
             content: '有时候觉得自己像一座孤岛，明明周围都是人，却感觉没有人真正理解自己。你们也会有这种感觉吗？',
             nickname: '孤独的鲸鱼',
             emoji: '🐋',
             color: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
             timestamp: now - 1000 * 60 * 60 * 36,
             resonates: 198,
-            tag: 'emotion'
+            tag: 'emotion',
+            replies: [
+                {
+                    id: generateId(),
+                    content: '会的。但是后来发现，其实每个人都在自己的世界里努力着，能遇到同频的人是幸运，遇不到也没关系。',
+                    nickname: '梦游的猫咪',
+                    emoji: '🐱',
+                    color: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
+                    timestamp: now - 1000 * 60 * 60 * 30,
+                    resonates: 67
+                },
+                {
+                    id: generateId(),
+                    content: '你不是一个人。在树洞里，我们都懂你。',
+                    nickname: '温暖的星星',
+                    emoji: '⭐',
+                    color: 'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)',
+                    timestamp: now - 1000 * 60 * 60 * 28,
+                    resonates: 52
+                }
+            ]
         }
     ];
 }
@@ -419,6 +553,62 @@ function renderMessages() {
         const tag = getTagByKey(msg.tag);
         const tagColor = tag ? tag.color : '#ccc';
         const tagLabel = tag ? tag.label : '';
+        const replies = msg.replies || [];
+        const replyCount = replies.length;
+        const isExpanded = expandedReplyIds.has(msg.id);
+        const isReplying = replyingToMessageId === msg.id;
+        const replyIdent = replyIdentity || currentIdentity;
+
+        const repliesHtml = replies.map(reply => {
+            const replyHasResonated = replyResonatedIds.has(reply.id);
+            return `
+                <div class="reply-item" data-reply-id="${reply.id}">
+                    <div class="reply-avatar" style="background: ${reply.color}">
+                        ${reply.emoji}
+                    </div>
+                    <div class="reply-body">
+                        <div class="reply-header">
+                            <span class="reply-nickname">${reply.nickname}</span>
+                            <span class="reply-time">${formatTime(reply.timestamp)}</span>
+                        </div>
+                        <div class="reply-content">${escapeHtml(reply.content)}</div>
+                        <div class="reply-footer">
+                            <button class="reply-resonate-btn ${replyHasResonated ? 'active' : ''}" data-message-id="${msg.id}" data-reply-id="${reply.id}">
+                                <span class="reply-heart-icon">${replyHasResonated ? '❤️' : '🤍'}</span>
+                                <span class="reply-resonate-count">${reply.resonates}</span>
+                                <span>共鸣</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const replyFormHtml = isReplying ? `
+            <div class="reply-form">
+                <div class="reply-form-header">
+                    <div class="reply-avatar-small" style="background: ${replyIdent.color}">
+                        ${replyIdent.emoji}
+                    </div>
+                    <span class="reply-form-nickname">${replyIdent.nickname}</span>
+                    <button class="reply-refresh-btn" data-message-id="${msg.id}" title="换一个昵称">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6M1 20v-6h6"/>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                    </button>
+                </div>
+                <textarea class="reply-input" data-message-id="${msg.id}" placeholder="写下你的回复..." maxlength="300"></textarea>
+                <div class="reply-form-footer">
+                    <span class="reply-char-count"><span class="reply-char-count-num">0</span>/300</span>
+                    <div class="reply-form-buttons">
+                        <button class="reply-cancel-btn" data-message-id="${msg.id}">取消</button>
+                        <button class="reply-submit-btn" data-message-id="${msg.id}">发送</button>
+                    </div>
+                </div>
+            </div>
+        ` : '';
+
         return `
             <div class="message-card" data-id="${msg.id}">
                 <div class="message-header">
@@ -440,6 +630,25 @@ function renderMessages() {
                         <span class="resonate-count">${msg.resonates}</span>
                         <span>共鸣</span>
                     </button>
+                    <button class="reply-toggle-btn" data-id="${msg.id}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span>回复</span>
+                        <span class="reply-count">${replyCount > 0 ? replyCount : ''}</span>
+                    </button>
+                </div>
+                <div class="replies-section ${isExpanded ? 'expanded' : ''}">
+                    <button class="replies-toggle" data-id="${msg.id}">
+                        <svg class="replies-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                        <span>${isExpanded ? '收起回复' : `查看${replyCount}条回复`}</span>
+                    </button>
+                    <div class="replies-list ${isExpanded ? 'visible' : ''}">
+                        ${repliesHtml}
+                        ${replyFormHtml}
+                    </div>
                 </div>
             </div>
         `;
@@ -447,6 +656,40 @@ function renderMessages() {
 
     container.querySelectorAll('.resonate-btn').forEach(btn => {
         btn.addEventListener('click', handleResonate);
+    });
+
+    container.querySelectorAll('.reply-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyToggle);
+    });
+
+    container.querySelectorAll('.replies-toggle').forEach(btn => {
+        btn.addEventListener('click', handleRepliesExpandToggle);
+    });
+
+    container.querySelectorAll('.reply-resonate-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyResonate);
+    });
+
+    container.querySelectorAll('.reply-submit-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplySubmit);
+    });
+
+    container.querySelectorAll('.reply-cancel-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyCancel);
+    });
+
+    container.querySelectorAll('.reply-refresh-btn').forEach(btn => {
+        btn.addEventListener('click', handleReplyRefreshIdentity);
+    });
+
+    container.querySelectorAll('.reply-input').forEach(input => {
+        input.addEventListener('input', handleReplyInput);
+        input.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const msgId = input.dataset.messageId;
+                submitReply(msgId);
+            }
+        });
     });
 }
 
@@ -475,6 +718,157 @@ function handleResonate(e) {
     saveResonated();
     renderMessages();
     renderTagFilters();
+}
+
+function handleReplyToggle(e) {
+    const msgId = e.currentTarget.dataset.id;
+
+    if (!expandedReplyIds.has(msgId)) {
+        expandedReplyIds.add(msgId);
+        saveExpandedReplies();
+    }
+
+    if (replyingToMessageId === msgId) {
+        replyingToMessageId = null;
+        replyIdentity = null;
+    } else {
+        replyingToMessageId = msgId;
+        replyIdentity = generateIdentity();
+    }
+
+    renderMessages();
+
+    if (replyingToMessageId === msgId) {
+        setTimeout(() => {
+            const replyInput = document.querySelector(`.reply-input[data-message-id="${msgId}"]`);
+            if (replyInput) {
+                replyInput.focus();
+            }
+        }, 50);
+    }
+}
+
+function handleRepliesExpandToggle(e) {
+    const msgId = e.currentTarget.dataset.id;
+
+    if (expandedReplyIds.has(msgId)) {
+        expandedReplyIds.delete(msgId);
+    } else {
+        expandedReplyIds.add(msgId);
+    }
+
+    saveExpandedReplies();
+    renderMessages();
+}
+
+function handleReplyResonate(e) {
+    const btn = e.currentTarget;
+    const msgId = btn.dataset.messageId;
+    const replyId = btn.dataset.replyId;
+    const msg = messages.find(m => m.id === msgId);
+
+    if (!msg || !msg.replies) return;
+
+    const reply = msg.replies.find(r => r.id === replyId);
+    if (!reply) return;
+
+    if (replyResonatedIds.has(replyId)) {
+        replyResonatedIds.delete(replyId);
+        reply.resonates = Math.max(0, reply.resonates - 1);
+    } else {
+        replyResonatedIds.add(replyId);
+        reply.resonates += 1;
+    }
+
+    saveMessages();
+    saveReplyResonated();
+    renderMessages();
+}
+
+function handleReplyInput(e) {
+    const input = e.currentTarget;
+    const msgId = input.dataset.messageId;
+    const replyCard = input.closest('.replies-list');
+    const charCount = replyCard.querySelector('.reply-char-count-num');
+    if (charCount) {
+        charCount.textContent = input.value.length;
+    }
+}
+
+function handleReplySubmit(e) {
+    const msgId = e.currentTarget.dataset.messageId;
+    submitReply(msgId);
+}
+
+function submitReply(msgId) {
+    const replyInput = document.querySelector(`.reply-input[data-message-id="${msgId}"]`);
+    if (!replyInput) return;
+
+    const content = replyInput.value.trim();
+    if (!content) {
+        replyInput.focus();
+        return;
+    }
+
+    const msg = messages.find(m => m.id === msgId);
+    if (!msg) return;
+
+    if (!replyIdentity) {
+        replyIdentity = generateIdentity();
+    }
+
+    const newReply = {
+        id: generateId(),
+        content: content,
+        nickname: replyIdentity.nickname,
+        emoji: replyIdentity.emoji,
+        color: replyIdentity.color,
+        timestamp: Date.now(),
+        resonates: 0
+    };
+
+    if (!msg.replies) {
+        msg.replies = [];
+    }
+    msg.replies.push(newReply);
+
+    saveMessages();
+
+    replyingToMessageId = null;
+    replyIdentity = null;
+
+    if (!expandedReplyIds.has(msgId)) {
+        expandedReplyIds.add(msgId);
+        saveExpandedReplies();
+    }
+
+    renderMessages();
+    renderTagFilters();
+
+    const repliesSection = document.querySelector(`.message-card[data-id="${msgId}"] .replies-section`);
+    if (repliesSection) {
+        repliesSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+function handleReplyCancel(e) {
+    const msgId = e.currentTarget.dataset.messageId;
+    replyingToMessageId = null;
+    replyIdentity = null;
+    renderMessages();
+}
+
+function handleReplyRefreshIdentity(e) {
+    const msgId = e.currentTarget.dataset.messageId;
+    replyIdentity = generateIdentity();
+    renderMessages();
+
+    setTimeout(() => {
+        const replyInput = document.querySelector(`.reply-input[data-message-id="${msgId}"]`);
+        if (replyInput) {
+            replyInput.focus();
+        }
+    }, 50);
 }
 
 function refreshIdentity() {
@@ -638,6 +1032,8 @@ function handleInput() {
 function init() {
     loadMessages();
     loadResonated();
+    loadReplyResonated();
+    loadExpandedReplies();
     loadDailyTopic();
     refreshIdentity();
     renderDailyTopic();

@@ -566,10 +566,22 @@ function renderMessages() {
     document.getElementById('messageCount').textContent = getFilteredMessages().length;
 
     if (sorted.length === 0) {
+        let emptyText = '树洞还是空的<br>来说点什么吧~';
+        if (currentTag !== 'all' && currentMood !== 'all') {
+            emptyText = '这个标签和心情下还没有留言~';
+        } else if (currentTag !== 'all') {
+            emptyText = '这个标签下还没有留言~';
+        } else if (currentMood !== 'all') {
+            const mood = getMoodByKey(currentMood);
+            const moodEmoji = mood ? mood.emoji : '😊';
+            const moodLabel = mood ? mood.label : '';
+            emptyText = `${moodEmoji} ${moodLabel}心情下还没有留言~`;
+        }
+
         container.innerHTML = `
             <div class="empty-state">
                 <div class="empty-state-icon">🌳</div>
-                <p class="empty-state-text">${currentTag === 'all' ? '树洞还是空的<br>来说点什么吧~' : '这个标签下还没有留言~'}</p>
+                <p class="empty-state-text">${emptyText}</p>
             </div>
         `;
         return;

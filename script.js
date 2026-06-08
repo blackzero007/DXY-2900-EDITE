@@ -169,6 +169,16 @@ function loadMessages() {
         if (!msg.mood) {
             msg.mood = 'calm';
         }
+        if (msg.resonates === undefined || msg.resonates === null || isNaN(msg.resonates)) {
+            msg.resonates = 0;
+        }
+        if (msg.replies && msg.replies.length > 0) {
+            msg.replies.forEach(reply => {
+                if (reply.resonates === undefined || reply.resonates === null || isNaN(reply.resonates)) {
+                    reply.resonates = 0;
+                }
+            });
+        }
     });
 
     if (messages.length === 0) {
@@ -576,7 +586,11 @@ function getSortedMessages() {
     const filtered = getFilteredMessages();
     const sorted = [...filtered];
     if (currentSort === 'hot') {
-        sorted.sort((a, b) => b.resonates - a.resonates || b.timestamp - a.timestamp);
+        sorted.sort((a, b) => {
+            const aResonates = parseInt(a.resonates) || 0;
+            const bResonates = parseInt(b.resonates) || 0;
+            return bResonates - aResonates || b.timestamp - a.timestamp;
+        });
     } else {
         sorted.sort((a, b) => b.timestamp - a.timestamp);
     }
@@ -1433,7 +1447,11 @@ function getRankingMessages() {
         filtered = filtered.filter(m => m.timestamp >= startOfMonth && m.timestamp <= now);
     }
 
-    const sorted = filtered.sort((a, b) => b.resonates - a.resonates || b.timestamp - a.timestamp);
+    const sorted = filtered.sort((a, b) => {
+        const aResonates = parseInt(a.resonates) || 0;
+        const bResonates = parseInt(b.resonates) || 0;
+        return bResonates - aResonates || b.timestamp - a.timestamp;
+    });
     return sorted.slice(0, 20);
 }
 
@@ -1467,6 +1485,7 @@ function renderRankingPage() {
         const rank = index + 1;
         const topClass = rank <= 3 ? `top-${rank}` : '';
         const rankDisplay = rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank;
+        const resonatesCount = parseInt(msg.resonates) || 0;
 
         return `
             <div class="ranking-item ${topClass}" data-id="${msg.id}">
@@ -1479,7 +1498,7 @@ function renderRankingPage() {
                     <div class="ranking-content">${escapeHtml(msg.content)}</div>
                 </div>
                 <div class="ranking-resonate">
-                    <span class="ranking-resonate-count">${msg.resonates}</span>
+                    <span class="ranking-resonate-count">${resonatesCount}</span>
                     <span class="ranking-resonate-label">共鸣</span>
                 </div>
             </div>

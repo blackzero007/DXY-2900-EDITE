@@ -3580,6 +3580,89 @@ function initDrift() {
     document.getElementById('pickBottleBtn').addEventListener('click', pickRandomBottle);
 }
 
+const EXPORT_STORAGE_KEYS = [
+    STORAGE_KEY,
+    RESONATED_KEY,
+    REPLY_RESONATED_KEY,
+    EXPANDED_REPLIES_KEY,
+    FAVORITES_KEY,
+    THEME_KEY,
+    DRAFT_KEY,
+    DAILY_TOPIC_KEY,
+    DRIFT_STORAGE_KEY,
+    DRIFT_MY_BOTTLES_KEY,
+    DRIFT_PICKED_KEY,
+    DRIFT_REPLIED_KEY
+];
+
+function exportData() {
+    const data = {};
+    for (const key of EXPORT_STORAGE_KEYS) {
+        const value = localStorage.getItem(key);
+        if (value !== null) {
+            data[key] = value;
+        }
+    }
+
+    const exportObj = {
+        version: 1,
+        exportTime: new Date().toISOString(),
+        app: 'tree-hole',
+        data: data
+    };
+
+    const jsonStr = JSON.stringify(exportObj, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `树洞数据_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('数据导出成功！');
+}
+
+function importData(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const content = e.target.result;
+            const importObj = JSON.parse(content);
+
+            if (!importObj.data || typeof importObj.data !== 'object') {
+                showToast('文件格式不正确');
+                return;
+            }
+
+            if (!confirm('导入数据将覆盖当前所有数据，确定要继续吗？')) {
+                return;
+            }
+
+            for (const key of EXPORT_STORAGE_KEYS) {
+                if (importObj.data[key] !== undefined) {
+                    localStorage.setItem(key, importObj.data[key]);
+                }
+            }
+
+            showToast('数据导入成功！页面即将刷新');
+
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+
+        } catch (err) {
+            console.error('Import error:', err);
+            showToast('导入失败，请检查文件格式');
+        }
+    };
+    reader.readAsText(file);
+}
+
 function init() {
     loadTheme();
     applyTheme(currentTheme);
@@ -3690,6 +3773,26 @@ function init() {
             closeAllCardMenus();
         }
     });
+
+    const exportDataBtn = document.getElementById('exportDataBtn');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', exportData);
+    }
+
+    const importDataBtn = document.getElementById('importDataBtn');
+    const importFileInput = document.getElementById('importFileInput');
+    if (importDataBtn && importFileInput) {
+        importDataBtn.addEventListener('click', () => {
+            importFileInput.click();
+        });
+        importFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                importData(file);
+            }
+            importFileInput.value = '';
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);

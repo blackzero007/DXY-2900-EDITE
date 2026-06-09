@@ -1220,10 +1220,23 @@ function highlightKeyword(text, keyword) {
         return escapeHtml(text);
     }
     const trimmedKeyword = keyword.trim();
-    const escapedText = escapeHtml(text);
-    const escapedKeyword = escapeHtml(trimmedKeyword);
-    const regex = new RegExp(`(${escapedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    return escapedText.replace(regex, '<span class="highlight">$1</span>');
+    const lowerText = text.toLowerCase();
+    const lowerKeyword = trimmedKeyword.toLowerCase();
+    const keywordLen = trimmedKeyword.length;
+    
+    let result = '';
+    let lastIndex = 0;
+    let index = lowerText.indexOf(lowerKeyword, lastIndex);
+    
+    while (index !== -1) {
+        result += escapeHtml(text.substring(lastIndex, index));
+        result += '<span class="highlight">' + escapeHtml(text.substring(index, index + keywordLen)) + '</span>';
+        lastIndex = index + keywordLen;
+        index = lowerText.indexOf(lowerKeyword, lastIndex);
+    }
+    
+    result += escapeHtml(text.substring(lastIndex));
+    return result;
 }
 
 function handleResonate(e) {

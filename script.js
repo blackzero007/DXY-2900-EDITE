@@ -249,6 +249,7 @@ let favoriteIds = new Map();
 let currentSort = 'hot';
 let currentTag = 'all';
 let currentMood = 'all';
+let searchKeyword = '';
 let currentFavSort = 'new';
 let currentRankingPeriod = 'week';
 let selectedPostTag = 'life';
@@ -947,6 +948,14 @@ function getFilteredMessages() {
     if (currentMood !== 'all') {
         filtered = filtered.filter(m => m.mood === currentMood);
     }
+    if (searchKeyword.trim()) {
+        const keyword = searchKeyword.trim().toLowerCase();
+        filtered = filtered.filter(m => {
+            const contentMatch = m.content.toLowerCase().includes(keyword);
+            const nicknameMatch = m.nickname.toLowerCase().includes(keyword);
+            return contentMatch || nicknameMatch;
+        });
+    }
     return filtered;
 }
 
@@ -984,24 +993,38 @@ function renderMessages() {
     document.getElementById('messageCount').textContent = getFilteredMessages().length;
 
     if (sorted.length === 0) {
-        let emptyText = '树洞还是空的<br>来说点什么吧~';
-        if (currentTag !== 'all' && currentMood !== 'all') {
-            emptyText = '这个标签和心情下还没有留言~';
-        } else if (currentTag !== 'all') {
-            emptyText = '这个标签下还没有留言~';
-        } else if (currentMood !== 'all') {
-            const mood = getMoodByKey(currentMood);
-            const moodEmoji = mood ? mood.emoji : '😊';
-            const moodLabel = mood ? mood.label : '';
-            emptyText = `${moodEmoji} ${moodLabel}心情下还没有留言~`;
-        }
+        let emptyHtml = '';
+        
+        if (searchKeyword.trim()) {
+            emptyHtml = `
+                <div class="search-empty-state">
+                    <div class="search-empty-icon">🔍</div>
+                    <div class="search-empty-title">没有找到相关留言</div>
+                    <div class="search-empty-desc">试试换个关键词搜索吧~<br>或者检查一下拼写是否正确</div>
+                </div>
+            `;
+        } else {
+            let emptyText = '树洞还是空的<br>来说点什么吧~';
+            if (currentTag !== 'all' && currentMood !== 'all') {
+                emptyText = '这个标签和心情下还没有留言~';
+            } else if (currentTag !== 'all') {
+                emptyText = '这个标签下还没有留言~';
+            } else if (currentMood !== 'all') {
+                const mood = getMoodByKey(currentMood);
+                const moodEmoji = mood ? mood.emoji : '😊';
+                const moodLabel = mood ? mood.label : '';
+                emptyText = `${moodEmoji} ${moodLabel}心情下还没有留言~`;
+            }
 
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">🌳</div>
-                <p class="empty-state-text">${emptyText}</p>
-            </div>
-        `;
+            emptyHtml = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🌳</div>
+                    <p class="empty-state-text">${emptyText}</p>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = emptyHtml;
         return;
     }
 
@@ -1029,10 +1052,10 @@ function renderMessages() {
                     </div>
                     <div class="reply-body">
                         <div class="reply-header">
-                            <span class="reply-nickname">${reply.nickname}</span>
+                            <span class="reply-nickname">${highlightKeyword(reply.nickname, searchKeyword)}</span>
                             <span class="reply-time">${formatTime(reply.timestamp)}</span>
                         </div>
-                        <div class="reply-content">${escapeHtml(reply.content)}</div>
+                        <div class="reply-content">${highlightKeyword(reply.content, searchKeyword)}</div>
                         <div class="reply-footer">
                             <button class="reply-resonate-btn ${replyHasResonated ? 'active' : ''}" data-message-id="${msg.id}" data-reply-id="${reply.id}">
                                 <span class="reply-heart-icon">${replyHasResonated ? '❤️' : '🤍'}</span>
@@ -1096,7 +1119,7 @@ function renderMessages() {
                         ${msg.emoji}
                     </div>
                     <div class="message-info">
-                        <div class="message-nickname">${msg.nickname}</div>
+                        <div class="message-nickname">${highlightKeyword(msg.nickname, searchKeyword)}</div>
                         <div class="message-time">${formatTime(msg.timestamp)}</div>
                     </div>
                     <span class="message-mood" style="--mood-color: ${moodColor}">
@@ -1108,7 +1131,7 @@ function renderMessages() {
                     </span>
                     ${capsuleBadgeHtml}
                 </div>
-                <div class="message-content">${escapeHtml(msg.content)}</div>
+                <div class="message-content">${highlightKeyword(msg.content, searchKeyword)}</div>
                 <div class="message-footer">
                     <button class="favorite-btn ${favoriteIds.has(msg.id) ? 'active' : ''}" data-id="${msg.id}">
                         <span class="star-icon">${favoriteIds.has(msg.id) ? '⭐' : '☆'}</span>
@@ -1190,6 +1213,17 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function highlightKeyword(text, keyword) {
+    if (!keyword || !keyword.trim()) {
+        return escapeHtml(text);
+    }
+    const trimmedKeyword = keyword.trim();
+    const escapedText = escapeHtml(text);
+    const escapedKeyword = escapeHtml(trimmedKeyword);
+    const regex = new RegExp(`(${escapedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return escapedText.replace(regex, '<span class="highlight">$1</span>');
 }
 
 function handleResonate(e) {
@@ -1695,6 +1729,30 @@ function handleMoodFilterChange(e) {
     renderMessages();
 }
 
+function handleSearch(e) {
+    searchKeyword = e.target.value;
+    const clearBtn = document.getElementById('searchClearBtn');
+    if (clearBtn) {
+        clearBtn.style.display = searchKeyword.trim() ? 'flex' : 'none';
+    }
+    renderMessages();
+    renderTagFilters();
+}
+
+function clearSearch() {
+    searchKeyword = '';
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('searchClearBtn');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    if (clearBtn) {
+        clearBtn.style.display = 'none';
+    }
+    renderMessages();
+    renderTagFilters();
+}
+
 function handleSortChange(e) {
     const sort = e.currentTarget.dataset.sort;
     if (sort === currentSort) return;
@@ -1767,10 +1825,10 @@ function renderFavoritesPage() {
                     </div>
                     <div class="reply-body">
                         <div class="reply-header">
-                            <span class="reply-nickname">${reply.nickname}</span>
+                            <span class="reply-nickname">${highlightKeyword(reply.nickname, searchKeyword)}</span>
                             <span class="reply-time">${formatTime(reply.timestamp)}</span>
                         </div>
-                        <div class="reply-content">${escapeHtml(reply.content)}</div>
+                        <div class="reply-content">${highlightKeyword(reply.content, searchKeyword)}</div>
                         <div class="reply-footer">
                             <button class="reply-resonate-btn ${replyHasResonated ? 'active' : ''}" data-message-id="${msg.id}" data-reply-id="${reply.id}">
                                 <span class="reply-heart-icon">${replyHasResonated ? '❤️' : '🤍'}</span>
@@ -2052,6 +2110,15 @@ function init() {
     document.getElementById('refreshNickname').addEventListener('click', refreshIdentity);
     document.getElementById('postInput').addEventListener('input', handleInput);
     document.getElementById('moodFilter').addEventListener('change', handleMoodFilterChange);
+    
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
+    if (searchClearBtn) {
+        searchClearBtn.addEventListener('click', clearSearch);
+    }
 
     document.getElementById('postInput').addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {
@@ -3064,6 +3131,15 @@ function init() {
     document.getElementById('refreshNickname').addEventListener('click', refreshIdentity);
     document.getElementById('postInput').addEventListener('input', handleInput);
     document.getElementById('moodFilter').addEventListener('change', handleMoodFilterChange);
+    
+    const searchInput = document.getElementById('searchInput');
+    const searchClearBtn = document.getElementById('searchClearBtn');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
+    if (searchClearBtn) {
+        searchClearBtn.addEventListener('click', clearSearch);
+    }
 
     document.getElementById('postInput').addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'Enter') {

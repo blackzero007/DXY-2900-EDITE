@@ -1697,6 +1697,7 @@ function handleReplyInput(e) {
     if (charCount) {
         charCount.textContent = input.value.length;
     }
+    autoResizeTextarea(input);
 }
 
 function handleReplySubmit(e) {
@@ -1752,6 +1753,7 @@ function submitReply(msgId) {
         saveExpandedReplies();
     }
 
+    replyInput.blur();
     renderMessages();
     renderTagFilters();
     renderMoodFilter();
@@ -1853,6 +1855,8 @@ function handleSubmit() {
 
     input.value = '';
     document.getElementById('charCount').textContent = '0';
+    autoResizeTextarea(input);
+    input.blur();
 
     selectedCapsuleOption = 'none';
     customCapsuleDate = '';
@@ -2501,9 +2505,17 @@ function updateRankingTabs() {
     });
 }
 
+function autoResizeTextarea(textarea) {
+    if (!textarea) return;
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
+
 function handleInput() {
     const input = document.getElementById('postInput');
     document.getElementById('charCount').textContent = input.value.length;
+    
+    autoResizeTextarea(input);
 
     if (draftSaveTimer) {
         clearTimeout(draftSaveTimer);
@@ -3277,6 +3289,7 @@ function handleDriftReplyInput(e) {
     if (charCount) {
         charCount.textContent = input.value.length;
     }
+    autoResizeTextarea(input);
 }
 
 function submitDriftReply() {
@@ -3337,6 +3350,7 @@ function submitDriftReply() {
     isReplyingDrift = false;
     driftReplyIdentity = null;
 
+    input.blur();
     renderDriftStats();
     renderMyDriftBottles();
     renderPickedDriftBottles();
@@ -3426,6 +3440,7 @@ function showThrowBottleModal() {
 
     input.addEventListener('input', (e) => {
         document.getElementById('driftWriteCharCount').textContent = e.target.value.length;
+        autoResizeTextarea(e.target);
     });
 
     input.addEventListener('keydown', (e) => {
@@ -3765,6 +3780,7 @@ function init() {
         if (postInput) {
             postInput.value = draftContent;
             document.getElementById('charCount').textContent = draftContent.length;
+            autoResizeTextarea(postInput);
         }
     }
 

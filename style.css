@@ -270,17 +270,19 @@ body {
 .post-input {
     width: 100%;
     min-height: 100px;
+    max-height: 300px;
     border: 2px solid var(--input-border);
     border-radius: 14px;
     padding: 14px;
     font-size: 15px;
     font-family: inherit;
-    resize: vertical;
+    resize: none;
     outline: none;
     transition: border-color 0.2s;
     line-height: 1.6;
     background: var(--input-bg);
     color: var(--text-primary);
+    overflow-y: auto;
 }
 
 .post-input:focus {
@@ -1591,16 +1593,18 @@ body {
 .reply-input {
     width: 100%;
     min-height: 60px;
+    max-height: 200px;
     border: 2px solid #e8e8e8;
     border-radius: 10px;
     padding: 10px;
     font-size: 14px;
     font-family: inherit;
-    resize: vertical;
+    resize: none;
     outline: none;
     transition: border-color 0.2s;
     line-height: 1.5;
     background: white;
+    overflow-y: auto;
 }
 
 .reply-input:focus {
@@ -2465,17 +2469,19 @@ body {
 .drift-reply-input {
     width: 100%;
     min-height: 80px;
+    max-height: 250px;
     border: 2px solid var(--input-border);
     border-radius: 10px;
     padding: 10px 12px;
     font-size: 14px;
     font-family: inherit;
-    resize: vertical;
+    resize: none;
     outline: none;
     transition: border-color 0.2s;
     line-height: 1.5;
     background: var(--input-bg);
     color: var(--text-primary);
+    overflow-y: auto;
 }
 
 .drift-reply-input:focus {
@@ -2660,17 +2666,19 @@ body {
 .drift-write-input {
     width: 100%;
     min-height: 120px;
+    max-height: 300px;
     border: 2px solid var(--input-border);
     border-radius: 14px;
     padding: 14px;
     font-size: 15px;
     font-family: inherit;
-    resize: vertical;
+    resize: none;
     outline: none;
     transition: border-color 0.2s;
     line-height: 1.6;
     background: var(--input-bg);
     color: var(--text-primary);
+    overflow-y: auto;
 }
 
 .drift-write-input:focus {
@@ -3371,6 +3379,62 @@ body {
     .daily-topic-icon {
         font-size: 28px;
     }
+
+    .submit-btn {
+        min-height: 48px;
+        min-width: 88px;
+        padding: 12px 28px;
+        font-size: 15px;
+    }
+
+    .sort-tab {
+        min-height: 44px;
+        padding: 10px 18px;
+    }
+
+    .nav-tab {
+        min-height: 44px;
+        padding: 12px 18px;
+    }
+
+    .card-menu-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .post-tag {
+        min-height: 36px;
+        padding: 8px 16px;
+    }
+
+    .tag-filter {
+        min-height: 36px;
+        padding: 8px 16px;
+    }
+
+    .drift-action-btn {
+        min-height: 56px;
+    }
+
+    .drift-bottle-btn {
+        min-height: 36px;
+        padding: 8px 16px;
+    }
+
+    .drift-detail-btn {
+        min-height: 44px;
+    }
+
+    .confirm-btn {
+        min-height: 44px;
+        min-width: 80px;
+    }
+
+    .drift-write-cancel,
+    .drift-write-submit {
+        min-height: 44px;
+        padding: 10px 24px;
+    }
 }
 
 .card-menu-wrap {
@@ -3616,12 +3680,20 @@ body {
     }
 
     .reply-toggle-btn {
-        padding: 6px 12px;
+        min-height: 36px;
+        padding: 8px 14px;
         font-size: 12px;
     }
 
     .resonate-btn {
-        padding: 6px 12px;
+        min-height: 36px;
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    .favorite-btn {
+        min-height: 36px;
+        padding: 8px 14px;
         font-size: 12px;
     }
 
@@ -3647,6 +3719,12 @@ body {
     .reply-input {
         min-height: 50px;
         font-size: 13px;
+    }
+
+    .reply-submit-btn,
+    .reply-cancel-btn {
+        min-height: 36px;
+        padding: 8px 18px;
     }
 
     .filter-section {

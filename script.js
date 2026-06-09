@@ -1144,9 +1144,14 @@ function renderMessages() {
             </span>
         ` : '';
 
+        const hotResonateBadgeHtml = isHotResonate ? `
+            <span class="hot-resonate-badge">🔥 热门共鸣</span>
+        ` : '';
+
         return `
             <div class="message-card ${cardClass} ${hotResonateClass}" data-id="${msg.id}">
                 ${unlockBannerHtml}
+                ${hotResonateBadgeHtml}
                 <div class="message-header">
                     <div class="message-avatar" style="background: ${msg.color}">
                         ${msg.emoji}

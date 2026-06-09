@@ -102,6 +102,55 @@ const TOPIC_POOL = [
     '你觉得人生中最重要的东西是什么？'
 ];
 
+const SENSITIVE_WORDS = [
+    '傻逼', '操你妈', '草泥马', '妈的', '他妈的', '尼玛', '你妈', '我靠', '卧槽',
+    '去死', '死人', '垃圾', '废物', '混蛋', '王八蛋', '龟儿子', '狗娘养的',
+    '色情', '黄片', '黄色', '卖淫', '嫖娼', '强奸', '奸淫', '迷奸',
+    '毒品', '吸毒', '贩毒', '海洛因', '冰毒', '大麻',
+    '赌博', '赌钱', '赌场', '下注',
+    '自杀', '自残', '割腕', '跳楼',
+    '恐怖分子', '爆炸', '杀人', '放火', '抢劫'
+];
+
+function filterSensitiveWords(content) {
+    let filtered = content;
+    let hasSensitive = false;
+
+    for (const word of SENSITIVE_WORDS) {
+        if (filtered.includes(word)) {
+            hasSensitive = true;
+            const replacement = '*'.repeat(word.length);
+            filtered = filtered.split(word).join(replacement);
+        }
+    }
+
+    return { filtered, hasSensitive };
+}
+
+let toastTimer = null;
+
+function showToast(message, duration = 2000) {
+    let toast = document.getElementById('globalToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'globalToast';
+        toast.className = 'global-toast';
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.classList.add('show');
+
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+    }
+
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        toastTimer = null;
+    }, duration);
+}
+
 const STORAGE_KEY = 'tree_hole_messages';
 const RESONATED_KEY = 'tree_hole_resonated';
 const REPLY_RESONATED_KEY = 'tree_hole_reply_resonated';
@@ -1629,10 +1678,16 @@ function submitReply(msgId) {
     const replyInput = document.querySelector(`.reply-input[data-message-id="${msgId}"]`);
     if (!replyInput) return;
 
-    const content = replyInput.value.trim();
-    if (!content) {
+    const rawContent = replyInput.value.trim();
+    if (!rawContent) {
         replyInput.focus();
         return;
+    }
+
+    const { filtered: content, hasSensitive } = filterSensitiveWords(rawContent);
+
+    if (hasSensitive) {
+        showToast('内容已自动过滤');
     }
 
     const msg = messages.find(m => m.id === msgId);
@@ -1718,11 +1773,17 @@ function toggleLockIdentity() {
 
 function handleSubmit() {
     const input = document.getElementById('postInput');
-    const content = input.value.trim();
+    const rawContent = input.value.trim();
 
-    if (!content) {
+    if (!rawContent) {
         input.focus();
         return;
+    }
+
+    const { filtered: content, hasSensitive } = filterSensitiveWords(rawContent);
+
+    if (hasSensitive) {
+        showToast('内容已自动过滤');
     }
 
     if (!currentIdentity) {
@@ -3192,10 +3253,16 @@ function submitDriftReply() {
     const input = document.getElementById('driftReplyInput');
     if (!input || !currentDriftBottle) return;
 
-    const content = input.value.trim();
-    if (!content) {
+    const rawContent = input.value.trim();
+    if (!rawContent) {
         input.focus();
         return;
+    }
+
+    const { filtered: content, hasSensitive } = filterSensitiveWords(rawContent);
+
+    if (hasSensitive) {
+        showToast('内容已自动过滤');
     }
 
     if (!driftReplyIdentity) {
@@ -3367,10 +3434,16 @@ function submitDriftBottle() {
     const input = document.getElementById('driftWriteInput');
     if (!input) return;
 
-    const content = input.value.trim();
-    if (!content) {
+    const rawContent = input.value.trim();
+    if (!rawContent) {
         input.focus();
         return;
+    }
+
+    const { filtered: content, hasSensitive } = filterSensitiveWords(rawContent);
+
+    if (hasSensitive) {
+        showToast('内容已自动过滤');
     }
 
     if (!driftWriteIdentity) {

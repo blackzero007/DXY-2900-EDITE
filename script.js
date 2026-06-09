@@ -464,6 +464,132 @@ function saveMessages() {
     }
 }
 
+function deleteMessage(msgId) {
+    const index = messages.findIndex(m => m.id === msgId);
+    if (index !== -1) {
+        messages.splice(index, 1);
+        saveMessages();
+    }
+    if (favoriteIds.has(msgId)) {
+        favoriteIds.delete(msgId);
+        saveFavorites();
+    }
+    if (resonatedIds.has(msgId)) {
+        resonatedIds.delete(msgId);
+        saveResonated();
+    }
+}
+
+let currentConfirmCallback = null;
+
+function showConfirmDialog(title, message, onConfirm) {
+    currentConfirmCallback = onConfirm;
+
+    let overlay = document.getElementById('confirmOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'confirmOverlay';
+        overlay.className = 'confirm-overlay';
+        overlay.innerHTML = `
+            <div class="confirm-dialog">
+                <div class="confirm-title" id="confirmTitle"></div>
+                <div class="confirm-message" id="confirmMessage"></div>
+                <div class="confirm-actions">
+                    <button class="confirm-btn cancel-btn" id="confirmCancelBtn">取消</button>
+                    <button class="confirm-btn confirm-btn-primary" id="confirmOkBtn">确认</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        document.getElementById('confirmCancelBtn').addEventListener('click', hideConfirmDialog);
+        document.getElementById('confirmOkBtn').addEventListener('click', () => {
+            if (currentConfirmCallback) {
+                currentConfirmCallback();
+            }
+            hideConfirmDialog();
+        });
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                hideConfirmDialog();
+            }
+        });
+    }
+
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    overlay.classList.add('show');
+}
+
+function hideConfirmDialog() {
+    const overlay = document.getElementById('confirmOverlay');
+    if (overlay) {
+        overlay.classList.remove('show');
+    }
+    currentConfirmCallback = null;
+}
+
+function closeAllCardMenus() {
+    document.querySelectorAll('.card-menu-dropdown.open').forEach(menu => {
+        menu.classList.remove('open');
+    });
+}
+
+function toggleCardMenu(msgId) {
+    const dropdown = document.querySelector(`.card-menu-dropdown[data-id="${msgId}"]`);
+    if (!dropdown) return;
+
+    const isOpen = dropdown.classList.contains('open');
+    closeAllCardMenus();
+    if (!isOpen) {
+        dropdown.classList.add('open');
+    }
+}
+
+function handleCardMenuClick(e) {
+    const btn = e.currentTarget;
+    const msgId = btn.dataset.id;
+    e.stopPropagation();
+    toggleCardMenu(msgId);
+}
+
+function handleDeleteClick(e) {
+    const btn = e.currentTarget;
+    const msgId = btn.dataset.id;
+    e.stopPropagation();
+
+    closeAllCardMenus();
+
+    showConfirmDialog(
+        '删除留言',
+        '确定要删除这条留言吗？删除后无法恢复。',
+        () => {
+            deleteMessage(msgId);
+            refreshCurrentPage();
+        }
+    );
+}
+
+function refreshCurrentPage() {
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (!activeTab) return;
+
+    const page = activeTab.dataset.page;
+    switch (page) {
+        case 'treehole':
+            renderMessages();
+            break;
+        case 'favorites':
+            renderFavoritesPage();
+            break;
+        case 'capsule':
+            renderCapsulePage();
+            break;
+        default:
+            renderMessages();
+    }
+}
+
 function loadResonated() {
     try {
         const stored = localStorage.getItem(RESONATED_KEY);
@@ -1179,6 +1305,21 @@ function renderMessages() {
                         ${tagLabel}
                     </span>
                     ${capsuleBadgeHtml}
+                    <div class="card-menu-wrap">
+                        <button class="card-menu-btn" data-id="${msg.id}" title="更多">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/>
+                                <circle cx="12" cy="12" r="2"/>
+                                <circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="card-menu-dropdown" data-id="${msg.id}">
+                            <button class="card-menu-item delete-item" data-id="${msg.id}">
+                                <span class="menu-item-icon">🗑️</span>
+                                <span>删除</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="message-content">${highlightKeyword(msg.content, searchKeyword)}</div>
                 <div class="message-footer">
@@ -1255,6 +1396,14 @@ function renderMessages() {
                 submitReply(msgId);
             }
         });
+    });
+
+    container.querySelectorAll('.card-menu-btn').forEach(btn => {
+        btn.addEventListener('click', handleCardMenuClick);
+    });
+
+    container.querySelectorAll('.card-menu-item.delete-item').forEach(btn => {
+        btn.addEventListener('click', handleDeleteClick);
     });
 }
 
@@ -2012,6 +2161,21 @@ function renderFavoritesPage() {
                     <span class="message-tag" style="background-color: ${tagColor}20; color: ${tagColor}">
                         ${tagLabel}
                     </span>
+                    <div class="card-menu-wrap">
+                        <button class="card-menu-btn" data-id="${msg.id}" title="更多">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="5" r="2"/>
+                                <circle cx="12" cy="12" r="2"/>
+                                <circle cx="12" cy="19" r="2"/>
+                            </svg>
+                        </button>
+                        <div class="card-menu-dropdown" data-id="${msg.id}">
+                            <button class="card-menu-item delete-item" data-id="${msg.id}">
+                                <span class="menu-item-icon">🗑️</span>
+                                <span>删除</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="message-content">${escapeHtml(msg.content)}</div>
                 <div class="favorite-time">收藏于 ${formatTime(msg.favoriteTime)}</div>
@@ -2089,6 +2253,14 @@ function renderFavoritesPage() {
                 submitReply(msgId);
             }
         });
+    });
+
+    container.querySelectorAll('.card-menu-btn').forEach(btn => {
+        btn.addEventListener('click', handleCardMenuClick);
+    });
+
+    container.querySelectorAll('.card-menu-item.delete-item').forEach(btn => {
+        btn.addEventListener('click', handleDeleteClick);
     });
 }
 
@@ -3343,6 +3515,12 @@ function init() {
             document.getElementById('charCount').textContent = draftContent.length;
         }
     }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.card-menu-wrap')) {
+            closeAllCardMenus();
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', init);

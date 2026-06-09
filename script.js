@@ -250,6 +250,7 @@ let favoriteIds = new Map();
 let currentSort = 'hot';
 let currentTag = 'all';
 let currentMood = 'all';
+let showOnlyResonated = false;
 let searchKeyword = '';
 let currentFavSort = 'new';
 let currentRankingPeriod = 'week';
@@ -987,6 +988,9 @@ function getFilteredMessages() {
             return contentMatch || nicknameMatch;
         });
     }
+    if (showOnlyResonated) {
+        filtered = filtered.filter(m => resonatedIds.has(m.id));
+    }
     return filtered;
 }
 
@@ -1032,6 +1036,13 @@ function renderMessages() {
                     <div class="search-empty-icon">🔍</div>
                     <div class="search-empty-title">没有找到相关留言</div>
                     <div class="search-empty-desc">试试换个关键词搜索吧~<br>或者检查一下拼写是否正确</div>
+                </div>
+            `;
+        } else if (showOnlyResonated) {
+            emptyHtml = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">❤️</div>
+                    <p class="empty-state-text">还没有点过共鸣的留言<br>去给喜欢的留言点个共鸣吧~</p>
                 </div>
             `;
         } else {
@@ -1870,6 +1881,11 @@ function handleSortChange(e) {
 
     currentSort = sort;
     updateSortTabs();
+    renderMessages();
+}
+
+function handleResonateFilterToggle(e) {
+    showOnlyResonated = e.target.checked;
     renderMessages();
 }
 
@@ -3270,6 +3286,11 @@ function init() {
     document.querySelectorAll('#treeholePage .sort-tab').forEach(tab => {
         tab.addEventListener('click', handleSortChange);
     });
+
+    const resonateFilterToggle = document.getElementById('resonateFilterToggle');
+    if (resonateFilterToggle) {
+        resonateFilterToggle.addEventListener('change', handleResonateFilterToggle);
+    }
 
     document.querySelectorAll('.favorites-sort-section .sort-tab').forEach(tab => {
         tab.addEventListener('click', handleFavSortChange);

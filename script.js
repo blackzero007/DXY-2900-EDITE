@@ -1073,6 +1073,8 @@ function renderMessages() {
         const isExpanded = expandedReplyIds.has(msg.id);
         const isReplying = replyingToMessageId === msg.id;
         const replyIdent = replyIdentity || currentIdentity;
+        const isHotResonate = msg.resonates >= 50;
+        const hotResonateClass = isHotResonate ? 'hot-resonate' : '';
 
         const repliesHtml = replies.map(reply => {
             const replyHasResonated = replyResonatedIds.has(reply.id);
@@ -1143,7 +1145,7 @@ function renderMessages() {
         ` : '';
 
         return `
-            <div class="message-card ${cardClass}" data-id="${msg.id}">
+            <div class="message-card ${cardClass} ${hotResonateClass}" data-id="${msg.id}">
                 ${unlockBannerHtml}
                 <div class="message-header">
                     <div class="message-avatar" style="background: ${msg.color}">
@@ -1270,6 +1272,59 @@ function highlightKeyword(text, keyword) {
     return result;
 }
 
+function createHeartParticles(btn, count = 6) {
+    const rect = btn.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'heart-particle';
+        particle.textContent = '❤️';
+        particle.style.position = 'fixed';
+        particle.style.left = centerX + 'px';
+        particle.style.top = centerY + 'px';
+        particle.style.pointerEvents = 'none';
+        particle.style.zIndex = '9999';
+        particle.style.fontSize = '18px';
+        particle.style.transform = 'translate(-50%, -50%)';
+
+        const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+        const distance = 30 + Math.random() * 30;
+        const offsetX = Math.cos(angle) * distance;
+        const offsetY = Math.sin(angle) * distance - 40;
+        const scale = 0.8 + Math.random() * 0.6;
+        const delay = Math.random() * 0.1;
+        const duration = 0.9 + Math.random() * 0.5;
+
+        particle.animate([
+            {
+                opacity: 1,
+                transform: `translate(-50%, -50%) translate(${offsetX * 0.1}px, 0) scale(${scale * 0.8})`
+            },
+            {
+                opacity: 1,
+                transform: `translate(-50%, -50%) translate(${offsetX * 0.5}px, ${offsetY * 0.5}px) scale(${scale * 1.1})`
+            },
+            {
+                opacity: 0,
+                transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) scale(${scale * 0.5})`
+            }
+        ], {
+            duration: duration * 1000,
+            delay: delay * 1000,
+            easing: 'ease-out',
+            fill: 'forwards'
+        });
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+            particle.remove();
+        }, (duration + delay) * 1000 + 100);
+    }
+}
+
 function handleResonate(e) {
     const btn = e.currentTarget;
     const id = btn.dataset.id;
@@ -1277,12 +1332,15 @@ function handleResonate(e) {
 
     if (!msg) return;
 
+    const isAdding = !resonatedIds.has(id);
+
     if (resonatedIds.has(id)) {
         resonatedIds.delete(id);
         msg.resonates = Math.max(0, msg.resonates - 1);
     } else {
         resonatedIds.add(id);
         msg.resonates += 1;
+        createHeartParticles(btn, 8);
     }
 
     saveMessages();
@@ -1362,12 +1420,15 @@ function handleReplyResonate(e) {
     const reply = msg.replies.find(r => r.id === replyId);
     if (!reply) return;
 
+    const isAdding = !replyResonatedIds.has(replyId);
+
     if (replyResonatedIds.has(replyId)) {
         replyResonatedIds.delete(replyId);
         reply.resonates = Math.max(0, reply.resonates - 1);
     } else {
         replyResonatedIds.add(replyId);
         reply.resonates += 1;
+        createHeartParticles(btn, 5);
     }
 
     saveMessages();
@@ -1860,6 +1921,8 @@ function renderFavoritesPage() {
         const isExpanded = expandedReplyIds.has(msg.id);
         const isReplying = replyingToMessageId === msg.id;
         const replyIdent = replyIdentity || currentIdentity;
+        const isHotResonate = msg.resonates >= 50;
+        const hotResonateClass = isHotResonate ? 'hot-resonate' : '';
 
         const repliesHtml = replies.map(reply => {
             const replyHasResonated = replyResonatedIds.has(reply.id);
@@ -1912,7 +1975,7 @@ function renderFavoritesPage() {
         ` : '';
 
         return `
-            <div class="message-card favorite-card" data-id="${msg.id}">
+            <div class="message-card favorite-card ${hotResonateClass}" data-id="${msg.id}">
                 <div class="message-header">
                     <div class="message-avatar" style="background: ${msg.color}">
                         ${msg.emoji}

@@ -100,6 +100,7 @@ const REPLY_RESONATED_KEY = 'tree_hole_reply_resonated';
 const EXPANDED_REPLIES_KEY = 'tree_hole_expanded_replies';
 const FAVORITES_KEY = 'tree_hole_favorites';
 const THEME_KEY = 'tree_hole_theme';
+const DRAFT_KEY = 'tree_hole_post_draft';
 
 const THEMES = {
     starry: {
@@ -262,6 +263,8 @@ let selectedCapsuleOption = 'none';
 let customCapsuleDate = '';
 let currentCapsuleTab = 'pending';
 let countdownTimer = null;
+let draftSaveTimer = null;
+const DRAFT_SAVE_DELAY = 500;
 
 const CAPSULE_OPTIONS = [
     { key: 'none', label: '普通发布', icon: '📝' },
@@ -553,6 +556,34 @@ function saveTheme() {
         localStorage.setItem(THEME_KEY, currentTheme);
     } catch (e) {
         console.error('保存主题失败:', e);
+    }
+}
+
+function loadDraft() {
+    try {
+        const stored = localStorage.getItem(DRAFT_KEY);
+        if (stored) {
+            return stored;
+        }
+    } catch (e) {
+        console.error('加载草稿失败:', e);
+    }
+    return '';
+}
+
+function saveDraft(content) {
+    try {
+        localStorage.setItem(DRAFT_KEY, content);
+    } catch (e) {
+        console.error('保存草稿失败:', e);
+    }
+}
+
+function clearDraft() {
+    try {
+        localStorage.removeItem(DRAFT_KEY);
+    } catch (e) {
+        console.error('清除草稿失败:', e);
     }
 }
 
@@ -1480,6 +1511,7 @@ function handleSubmit() {
 
     messages.unshift(newMessage);
     saveMessages();
+    clearDraft();
 
     input.value = '';
     document.getElementById('charCount').textContent = '0';
@@ -2102,6 +2134,13 @@ function updateRankingTabs() {
 function handleInput() {
     const input = document.getElementById('postInput');
     document.getElementById('charCount').textContent = input.value.length;
+
+    if (draftSaveTimer) {
+        clearTimeout(draftSaveTimer);
+    }
+    draftSaveTimer = setTimeout(() => {
+        saveDraft(input.value);
+    }, DRAFT_SAVE_DELAY);
 }
 
 function init() {
@@ -3206,6 +3245,15 @@ function init() {
     document.querySelectorAll('.capsule-tab').forEach(tab => {
         tab.addEventListener('click', handleCapsuleTabChange);
     });
+
+    const draftContent = loadDraft();
+    if (draftContent) {
+        const postInput = document.getElementById('postInput');
+        if (postInput) {
+            postInput.value = draftContent;
+            document.getElementById('charCount').textContent = draftContent.length;
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);

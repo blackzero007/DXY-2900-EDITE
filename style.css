@@ -239,6 +239,34 @@ body {
     transform: rotate(180deg);
 }
 
+.lock-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    transition: all 0.2s;
+}
+
+.lock-btn:hover {
+    background: #e0e0e0;
+    color: var(--accent-color);
+}
+
+.lock-btn.locked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.lock-btn.locked:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+}
+
 .post-input {
     width: 100%;
     min-height: 100px;
@@ -2532,6 +2560,34 @@ body {
     transform: rotate(180deg);
 }
 
+.drift-write-lock {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: var(--button-secondary-bg);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.drift-write-lock:hover {
+    background: var(--button-secondary-hover-bg);
+    color: var(--accent-color);
+}
+
+.drift-write-lock.locked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.drift-write-lock.locked:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+}
+
 .drift-write-input {
     width: 100%;
     min-height: 120px;
@@ -3853,6 +3909,21 @@ body[data-theme='starry'] .refresh-btn {
 body[data-theme='starry'] .refresh-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     color: #a855f7;
+}
+
+body[data-theme='starry'] .lock-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+body[data-theme='starry'] .lock-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #a855f7;
+}
+
+body[data-theme='starry'] .lock-btn.locked {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    color: white;
 }
 
 body[data-theme='starry'] .reply-toggle-btn {

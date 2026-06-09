@@ -6,7 +6,11 @@ const adjectives = [
     '快乐的', '忧郁的', '浪漫的', '古怪的', '机智的',
     '梦游的', '飞翔的', '游泳的', '跳舞的', '唱歌的',
     '月亮上的', '星星上的', '云朵里的', '彩虹下的', '森林里的',
-    '海边的', '山顶的', '花园里的', '图书馆的', '咖啡店的'
+    '海边的', '山顶的', '花园里的', '图书馆的', '咖啡店的',
+    '香草味的', '椰子味的', '焦糖味的', '水蜜桃味的', '葡萄味的',
+    '傲娇的', '腹黑的', '呆萌的', '元气的', '佛系的',
+    '摸鱼的', '发呆的', '打哈欠的', '冒泡泡的', '闪闪发光的',
+    '屋顶的', '巷口的', '教室的', '厨房的', '被窝里的'
 ];
 
 const nouns = [
@@ -17,7 +21,11 @@ const nouns = [
     '魔法师', '探险家', '梦想家', '诗人', '画家',
     '音乐家', '旅行家', '美食家', '科学家', '发明家',
     '月亮', '星星', '云朵', '彩虹', '流星',
-    '花朵', '树叶', '露珠', '雪花', '泡泡'
+    '花朵', '树叶', '露珠', '雪花', '泡泡',
+    '仓鼠', '刺猬', '水獭', '浣熊', '羊驼',
+    '宇航员', '侦探', '厨师', '园丁', '船长',
+    '海浪', '微风', '晚霞', '极光', '萤火虫',
+    '泡芙', '布丁', '蛋挞', '马卡龙', '棉花糖'
 ];
 
 const emojis = [
@@ -257,6 +265,7 @@ let currentRankingPeriod = 'week';
 let selectedPostTag = 'life';
 let selectedPostMood = 'happy';
 let currentIdentity = null;
+let lockIdentity = false;
 let dailyTopic = '';
 let replyingToMessageId = null;
 let replyIdentity = null;
@@ -1695,6 +1704,18 @@ function refreshIdentity() {
     document.getElementById('previewAvatar').style.background = currentIdentity.color;
 }
 
+function toggleLockIdentity() {
+    lockIdentity = !lockIdentity;
+    const btn = document.getElementById('lockIdentityBtn');
+    if (lockIdentity) {
+        btn.classList.add('locked');
+        btn.title = '解锁身份';
+    } else {
+        btn.classList.remove('locked');
+        btn.title = '锁定当前身份';
+    }
+}
+
 function handleSubmit() {
     const input = document.getElementById('postInput');
     const content = input.value.trim();
@@ -1746,7 +1767,9 @@ function handleSubmit() {
     customCapsuleDate = '';
     renderCapsuleOptions();
 
-    refreshIdentity();
+    if (!lockIdentity) {
+        refreshIdentity();
+    }
 
     currentTag = 'all';
     currentSort = 'new';
@@ -2416,6 +2439,7 @@ function init() {
 
     document.getElementById('submitBtn').addEventListener('click', handleSubmit);
     document.getElementById('refreshNickname').addEventListener('click', refreshIdentity);
+    document.getElementById('lockIdentityBtn').addEventListener('click', toggleLockIdentity);
     document.getElementById('postInput').addEventListener('input', handleInput);
     document.getElementById('moodFilter').addEventListener('change', handleMoodFilterChange);
     
@@ -2464,6 +2488,7 @@ let currentDriftBottle = null;
 let isWritingDrift = false;
 let driftWriteIdentity = null;
 let driftReplyIdentity = null;
+let lockDriftIdentity = false;
 let isReplyingDrift = false;
 
 function loadDriftBottles() {
@@ -3271,6 +3296,12 @@ function showThrowBottleModal() {
                         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
                     </svg>
                 </button>
+                <button class="drift-write-lock ${lockDriftIdentity ? 'locked' : ''}" id="driftWriteLockBtn" title="${lockDriftIdentity ? '解锁身份' : '锁定当前身份'}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </button>
             </div>
             <textarea 
                 class="drift-write-input" 
@@ -3308,6 +3339,15 @@ function showThrowBottleModal() {
 
     document.getElementById('driftWriteRefreshBtn').addEventListener('click', () => {
         driftWriteIdentity = generateIdentity();
+        showThrowBottleModal();
+        setTimeout(() => {
+            const inp = document.getElementById('driftWriteInput');
+            if (inp) inp.focus();
+        }, 50);
+    });
+
+    document.getElementById('driftWriteLockBtn').addEventListener('click', () => {
+        lockDriftIdentity = !lockDriftIdentity;
         showThrowBottleModal();
         setTimeout(() => {
             const inp = document.getElementById('driftWriteInput');
@@ -3357,7 +3397,9 @@ function submitDriftBottle() {
     saveDriftBottles();
     saveMyDriftBottles();
 
-    driftWriteIdentity = generateIdentity();
+    if (!lockDriftIdentity) {
+        driftWriteIdentity = generateIdentity();
+    }
     isWritingDrift = false;
 
     renderDriftStats();
@@ -3460,6 +3502,7 @@ function init() {
 
     document.getElementById('submitBtn').addEventListener('click', handleSubmit);
     document.getElementById('refreshNickname').addEventListener('click', refreshIdentity);
+    document.getElementById('lockIdentityBtn').addEventListener('click', toggleLockIdentity);
     document.getElementById('postInput').addEventListener('input', handleInput);
     document.getElementById('moodFilter').addEventListener('change', handleMoodFilterChange);
     

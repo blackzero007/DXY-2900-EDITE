@@ -2693,6 +2693,14 @@ function renderCapsulePage() {
     container.querySelectorAll('.capsule-view-btn').forEach(btn => {
         btn.addEventListener('click', handleCapsuleViewClick);
     });
+
+    container.querySelectorAll('.card-menu-btn').forEach(btn => {
+        btn.addEventListener('click', handleCardMenuClick);
+    });
+
+    container.querySelectorAll('.card-menu-item.delete-item').forEach(btn => {
+        btn.addEventListener('click', handleDeleteClick);
+    });
 }
 
 function renderCapsuleCard(capsule) {
@@ -2750,6 +2758,21 @@ function renderCapsuleCard(capsule) {
                     <span>⏳</span>
                     <span>时光胶囊</span>
                 </span>
+                <div class="card-menu-wrap">
+                    <button class="card-menu-btn" data-id="${capsule.id}" title="更多">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="2"/>
+                            <circle cx="12" cy="12" r="2"/>
+                            <circle cx="12" cy="19" r="2"/>
+                        </svg>
+                    </button>
+                    <div class="card-menu-dropdown" data-id="${capsule.id}">
+                        <button class="card-menu-item delete-item" data-id="${capsule.id}">
+                            <span class="menu-item-icon">🗑️</span>
+                            <span>删除</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             ${countdownHtml}
             <div class="capsule-card-content">${escapeHtml(capsule.content)}</div>

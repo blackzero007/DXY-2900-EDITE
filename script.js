@@ -102,6 +102,29 @@ const TOPIC_POOL = [
     '你觉得人生中最重要的东西是什么？'
 ];
 
+const WARM_WORDS_POOL = [
+    '每个来到这里的人，都值得被温柔以待 🌿',
+    '树洞在等你，也在等风来 🍃',
+    '有些话说出来，就会变轻一点 ✨',
+    '今天的你，已经很棒了 💫',
+    '愿你被世界温柔相待，就像你温柔对待世界一样 🌸',
+    '慢慢来，比较快 🌙',
+    '你不是一座孤岛，这里有人在听 🌊',
+    '生活偶尔会有点苦，但你是甜的 🍬',
+    '每一个故事，都值得被倾听 📖',
+    '把心事交给树洞，把快乐还给自己 🎐',
+    '天会亮的，你也会好的 ☀️',
+    '你已经做得很好了，休息一下也没关系 ☕',
+    '总有人山高路远，为你而来 🏔️',
+    '温柔的晚风，一定会吹散很多不愉快 🌆',
+    '保持热爱，奔赴山海 ⛰️',
+    '所有的好运，都在路上 🛤️',
+    '你值得世间所有的美好 💝',
+    '把心放宽，把事看淡，生活才会越来越甜 🍯',
+    '今天也要做个开心的小朋友呀 🎈',
+    '星光不问赶路人，时光不负有心人 ⭐'
+];
+
 const SENSITIVE_WORDS = [
     '傻逼', '操你妈', '草泥马', '妈的', '他妈的', '尼玛', '你妈', '我靠', '卧槽',
     '去死', '死人', '垃圾', '废物', '混蛋', '王八蛋', '龟儿子', '狗娘养的',
@@ -1230,7 +1253,10 @@ function renderMessages() {
                 </div>
             `;
         } else {
-            let emptyText = '树洞还是空的<br>来说点什么吧~';
+            let emptyText = '';
+            let emptyIcon = '🌳';
+            let showWarmWord = false;
+
             if (currentTag !== 'all' && currentMood !== 'all') {
                 emptyText = '这个标签和心情下还没有留言~';
             } else if (currentTag !== 'all') {
@@ -1240,11 +1266,14 @@ function renderMessages() {
                 const moodEmoji = mood ? mood.emoji : '😊';
                 const moodLabel = mood ? mood.label : '';
                 emptyText = `${moodEmoji} ${moodLabel}心情下还没有留言~`;
+            } else {
+                showWarmWord = true;
+                emptyText = randomChoice(WARM_WORDS_POOL);
             }
 
             emptyHtml = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">🌳</div>
+                <div class="empty-state ${showWarmWord ? 'warm-empty' : ''}">
+                    <div class="empty-state-icon">${emptyIcon}</div>
                     <p class="empty-state-text">${emptyText}</p>
                 </div>
             `;
@@ -1254,8 +1283,9 @@ function renderMessages() {
         return;
     }
 
-    container.innerHTML = sorted.map(msg => {
+    container.innerHTML = sorted.map((msg, index) => {
         const hasResonated = resonatedIds.has(msg.id);
+        const animationDelay = `${index * 0.08}s`;
         const tag = getTagByKey(msg.tag);
         const tagColor = tag ? tag.color : '#ccc';
         const tagLabel = tag ? tag.label : '';
@@ -1344,7 +1374,7 @@ function renderMessages() {
         ` : '';
 
         return `
-            <div class="message-card ${cardClass} ${hotResonateClass}" data-id="${msg.id}">
+            <div class="message-card ${cardClass} ${hotResonateClass}" data-id="${msg.id}" style="animation-delay: ${animationDelay}">
                 ${unlockBannerHtml}
                 ${hotResonateBadgeHtml}
                 <div class="message-header">
